@@ -7,10 +7,13 @@ import com.campus.jobfair.entity.Job;
 import com.campus.jobfair.entity.Resume;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.enums.ApplicationStatus;
+import com.campus.jobfair.entity.enums.NotificationType;
+import com.campus.jobfair.entity.enums.UserRole;
 import com.campus.jobfair.repository.ApplicationRecordRepository;
 import com.campus.jobfair.repository.JobRepository;
 import com.campus.jobfair.repository.ResumeRepository;
 import com.campus.jobfair.repository.StudentRepository;
+import com.campus.jobfair.service.NotificationService;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -25,15 +28,18 @@ public class ApplicationService {
     private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final ResumeRepository resumeRepository;
+    private final NotificationService notificationService;
 
     public ApplicationService(ApplicationRecordRepository applicationRecordRepository,
                               StudentRepository studentRepository,
                               JobRepository jobRepository,
-                              ResumeRepository resumeRepository) {
+                              ResumeRepository resumeRepository,
+                              NotificationService notificationService) {
         this.applicationRecordRepository = applicationRecordRepository;
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.resumeRepository = resumeRepository;
+        this.notificationService = notificationService;
     }
 
     public List<ApplicationRecord> listMyApplications(String studentUsername) {
@@ -62,8 +68,15 @@ public class ApplicationService {
             Resume resume = resumeRepository.findById(request.getResumeId())
                     .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "简历不存在"));
             record.setResume(resume);
+        } else if (student.getDefaultResumeId() != null) {
+            Resume resume = resumeRepository.findById(student.getDefaultResumeId())
+                    .orElse(null);
+            record.setResume(resume);
         }
-        return applicationRecordRepository.save(record);
+        ApplicationRecord saved = applicationRecordRepository.save(record);
+        notificationService.send(UserRole.COMPANY, job.getCompany().getId(),
+                "新的简历投递", "岗位" + job.getTitle() + "收到新的投递", NotificationType.APPLICATION_STATUS);
+        return saved;
     }
 
     @Transactional
@@ -86,6 +99,9 @@ public class ApplicationService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "投递不存在"));
         record.setStatus(req.getStatus());
         record.setNotes(req.getNotes());
-        return applicationRecordRepository.save(record);
+        ApplicationRecord saved = applicationRecordRepository.save(record);
+        notificationService.send(UserRole.STUDENT, record.getStudent().getId(),
+                "投递状态更新", "您的投递状态变更为" + req.getStatus().name(), NotificationType.APPLICATION_STATUS);
+        return saved;
     }
 }

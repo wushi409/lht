@@ -2,6 +2,7 @@ package com.campus.jobfair.repository;
 
 import com.campus.jobfair.entity.ApplicationRecord;
 import com.campus.jobfair.entity.Job;
+import com.campus.jobfair.entity.Resume;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.enums.ApplicationStatus;
 import java.util.List;
@@ -13,4 +14,6 @@ public interface ApplicationRecordRepository extends JpaRepository<ApplicationRe
     List<ApplicationRecord> findByJob(Job job);
     Optional<ApplicationRecord> findByStudentAndJob(Student student, Job job);
     long countByJobAndStatus(Job job, ApplicationStatus status);
+    long countByResume(Resume resume);
+    long countByStatus(ApplicationStatus status);
 }

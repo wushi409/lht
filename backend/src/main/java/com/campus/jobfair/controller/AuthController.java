@@ -5,6 +5,7 @@ import com.campus.jobfair.dto.AuthDtos.AuthResponse;
 import com.campus.jobfair.dto.AuthDtos.CompanyRegisterRequest;
 import com.campus.jobfair.dto.AuthDtos.LoginRequest;
 import com.campus.jobfair.dto.AuthDtos.StudentRegisterRequest;
+import com.campus.jobfair.dto.ResetPasswordRequest;
 import com.campus.jobfair.service.AuthService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -36,5 +37,11 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(authService.login(request)));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(ApiResponse.ok("密码已重置", null));
     }
 }

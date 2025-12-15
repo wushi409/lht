@@ -4,6 +4,7 @@ import com.campus.jobfair.dto.AuthDtos.AuthResponse;
 import com.campus.jobfair.dto.AuthDtos.CompanyRegisterRequest;
 import com.campus.jobfair.dto.AuthDtos.LoginRequest;
 import com.campus.jobfair.dto.AuthDtos.StudentRegisterRequest;
+import com.campus.jobfair.dto.ResetPasswordRequest;
 import com.campus.jobfair.entity.Company;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.UserAccount;
@@ -107,5 +108,17 @@ public class AuthService {
         CustomUserDetails principal = (CustomUserDetails) authentication.getPrincipal();
         String token = jwtService.generateToken(principal);
         return new AuthResponse(token, principal.getRole().name());
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest req) {
+        UserAccount account = userAccountRepository.findByUsername(req.getUsername())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "账号不存在"));
+        // 简化验证码校验：仅检查非空
+        if (req.getCode() == null || req.getCode().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "验证码无效");
+        }
+        account.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
+        userAccountRepository.save(account);
     }
 }

@@ -4,8 +4,11 @@ import com.campus.jobfair.dto.CompanyUpdateRequest;
 import com.campus.jobfair.entity.Company;
 import com.campus.jobfair.entity.UserAccount;
 import com.campus.jobfair.entity.enums.CompanyStatus;
+import com.campus.jobfair.entity.enums.NotificationType;
+import com.campus.jobfair.entity.enums.UserRole;
 import com.campus.jobfair.repository.CompanyRepository;
 import com.campus.jobfair.repository.UserAccountRepository;
+import com.campus.jobfair.service.NotificationService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,10 +20,12 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final UserAccountRepository userAccountRepository;
+    private final NotificationService notificationService;
 
-    public CompanyService(CompanyRepository companyRepository, UserAccountRepository userAccountRepository) {
+    public CompanyService(CompanyRepository companyRepository, UserAccountRepository userAccountRepository, NotificationService notificationService) {
         this.companyRepository = companyRepository;
         this.userAccountRepository = userAccountRepository;
+        this.notificationService = notificationService;
     }
 
     public Company getById(Long id) {
@@ -62,11 +67,14 @@ public class CompanyService {
         company.setRejectionReason(approved ? null : reason);
         companyRepository.save(company);
 
-        // 激活或停用账号
         userAccountRepository.findByUsername(company.getCreditCode()).ifPresent(acc -> {
             acc.setActive(approved);
             userAccountRepository.save(acc);
         });
+        notificationService.send(UserRole.COMPANY, company.getId(),
+                approved ? "企业审核通过" : "企业审核拒绝",
+                approved ? "您的企业已通过审核" : "审核被拒绝: " + reason,
+                NotificationType.APPROVAL_RESULT);
         return company;
     }
 }

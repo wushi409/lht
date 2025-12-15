@@ -10,6 +10,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     List<Review> findByCompanyAndStatus(Company company, ReviewStatus status);
+    List<Review> findByCompany(Company company);
 
     @Query("select avg(r.rating) from Review r where r.company = :company and r.status = 'VISIBLE'")
     Double averageRating(@Param("company") Company company);
