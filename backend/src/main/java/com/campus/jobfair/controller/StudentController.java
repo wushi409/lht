@@ -118,4 +118,9 @@ public class StudentController {
                                                                         @Valid @RequestBody EventRegistrationRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.register(user.getUsername(), request)));
     }
+
+    @GetMapping("/me/events")
+    public ResponseEntity<ApiResponse<List<EventRegistration>>> myEvents(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.listMyRegistrations(user.getUsername())));
+    }
 }

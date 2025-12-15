@@ -79,4 +79,10 @@ public class EventService {
         registration.setCheckinTime(Instant.now());
         return eventRegistrationRepository.save(registration);
     }
+
+    public List<EventRegistration> listMyRegistrations(String studentUsername) {
+        Student student = studentRepository.findByStudentNo(studentUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
+        return eventRegistrationRepository.findByStudent(student);
+    }
 }
