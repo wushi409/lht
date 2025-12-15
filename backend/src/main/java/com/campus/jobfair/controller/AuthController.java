@@ -1,0 +1,40 @@
+package com.campus.jobfair.controller;
+
+import com.campus.jobfair.dto.ApiResponse;
+import com.campus.jobfair.dto.AuthDtos.AuthResponse;
+import com.campus.jobfair.dto.AuthDtos.CompanyRegisterRequest;
+import com.campus.jobfair.dto.AuthDtos.LoginRequest;
+import com.campus.jobfair.dto.AuthDtos.StudentRegisterRequest;
+import com.campus.jobfair.service.AuthService;
+import jakarta.validation.Valid;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
+@RequestMapping("/auth")
+public class AuthController {
+
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
+
+    @PostMapping("/register/student")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerStudent(@Valid @RequestBody StudentRegisterRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("注册成功", authService.registerStudent(request)));
+    }
+
+    @PostMapping("/register/company")
+    public ResponseEntity<ApiResponse<AuthResponse>> registerCompany(@Valid @RequestBody CompanyRegisterRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok("企业申请已提交，待审核", authService.registerCompany(request)));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(authService.login(request)));
+    }
+}
