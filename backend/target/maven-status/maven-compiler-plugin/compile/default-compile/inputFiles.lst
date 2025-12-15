@@ -56,6 +56,8 @@ D:\毕设\lht\backend\src\main\java\com\campus\jobfair\controller\AuditController.
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\enums\JobStatus.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\JobRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\Job.java
+D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\FileResourceRepository.java
+D:\毕设\lht\backend\src\main\java\com\campus\jobfair\config\CorsConfig.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\enums\ApplicationStatus.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\FavoriteCompany.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\security\JwtService.java
@@ -85,6 +87,7 @@ D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\BoothRepository.
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\ReviewRepository.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\Company.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\JobFairApplication.java
+D:\毕设\lht\backend\src\main\java\com\campus\jobfair\config\GlobalExceptionHandler.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\ReviewRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\Resume.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\AuditLogRepository.java

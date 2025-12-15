@@ -1,6 +1,7 @@
 package com.campus.jobfair.service;
 
 import com.campus.jobfair.entity.AuditLog;
+import com.campus.jobfair.entity.enums.UserRole;
 import com.campus.jobfair.repository.AuditLogRepository;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -16,12 +17,13 @@ public class AuditLogService {
     }
 
     @Transactional
-    public AuditLog log(String userType, String username, String action, String result) {
+    public AuditLog log(UserRole actorRole, Long actorId, String action, String detail, boolean success) {
         AuditLog log = new AuditLog();
-        log.setUserType(userType);
-        log.setUsername(username);
+        log.setActorRole(actorRole);
+        log.setActorId(actorId);
         log.setAction(action);
-        log.setResult(result);
+        log.setDetail(detail);
+        log.setSuccess(success);
         return auditLogRepository.save(log);
     }
 

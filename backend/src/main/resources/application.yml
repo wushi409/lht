@@ -16,9 +16,10 @@ spring:
       enabled: true
       path: /h2-console
 
-jwt:
-  secret: ${JWT_SECRET:dev-secret-key}
-  expiration: ${JWT_EXPIRATION_MS:604800000}
+security:
+  jwt:
+    secret: ${JWT_SECRET:ZGV2LXNlY3JldC1rZXktZm9yLWNhbXB1cy1qb2JmYWlyLXN5c3RlbS0yMDI1}
+    expiration-ms: ${JWT_EXPIRATION_MS:604800000}
 
 storage:
   upload-dir: ${STORAGE_UPLOAD_DIR:uploads}
