@@ -54,9 +54,78 @@ export function addFavoriteJob(jobId) {
   })
 }
 
-export function removeFavoriteJob(jobId) {
+// Resumes
+export function listResumes() {
   return request({
-    url: `/students/me/favorites/jobs/${jobId}`,
+    url: '/resumes',
+    method: 'get'
+  })
+}
+
+export function createResume(data) {
+  return request({
+    url: '/resumes',
+    method: 'post',
+    data
+  })
+}
+
+export function updateResume(id, data) {
+  return request({
+    url: `/resumes/${id}`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteResume(id) {
+  return request({
+    url: `/resumes/${id}`,
     method: 'delete'
   })
 }
+
+export function setDefaultResume(id) {
+  return request({
+    url: `/resumes/${id}/default`,
+    method: 'post'
+  })
+}
+
+export function uploadResumeFile(id, file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: `/resumes/${id}/file`,
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}
+
+// Interviews
+export function listStudentInterviews() {
+  return request({
+    url: '/interviews/student/me',
+    method: 'get'
+  })
+}
+
+export function respondToInterview(id, status) {
+  return request({
+    url: `/interviews/${id}/status`,
+    method: 'post',
+    data: { status }
+  })
+}
+
+// Companies
+export function listCompanies() {
+  return request({
+    url: '/companies',
+    method: 'get'
+  })
+}
+

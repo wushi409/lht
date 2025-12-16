@@ -18,7 +18,7 @@ export const companyApi = {
 
   createJob(data) {
     return request({
-      url: '/companies/me/jobs',
+      url: '/jobs',
       method: 'post',
       data
     })
@@ -26,7 +26,7 @@ export const companyApi = {
 
   updateJob(id, data) {
     return request({
-      url: `/companies/me/jobs/${id}`,
+      url: `/jobs/${id}`,
       method: 'put',
       data
     })
@@ -34,7 +34,7 @@ export const companyApi = {
 
   changeJobStatus(id, status) {
     return request({
-      url: `/companies/me/jobs/${id}/status`,
+      url: `/jobs/${id}/status`,
       method: 'post',
       params: { status }
     })

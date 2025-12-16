@@ -1,29 +1,39 @@
 <template>
-  <div class="register-container">
-    <el-card class="register-card">
+  <div class="register-container flex justify-center items-center min-h-screen bg-gray-100 py-10">
+    <el-card class="box-card w-full max-w-lg">
       <template #header>
-        <div class="card-header">
-          <h2>学生注册</h2>
-          <el-button type="text" @click="$router.push('/login')">返回登录</el-button>
+        <div class="card-header text-center">
+          <h2 class="text-xl font-bold">学生注册</h2>
         </div>
       </template>
-      <el-form :model="form" :rules="rules" ref="formRef" label-width="80px">
-        <el-form-item label="学号" prop="studentId">
-          <el-input v-model="form.studentId"></el-input>
-        </el-form-item>
-        <el-form-item label="姓名" prop="name">
-          <el-input v-model="form.name"></el-input>
+      <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="100px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="registerForm.username" placeholder="请输入用户名" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
-          <el-input v-model="form.password" type="password" show-password></el-input>
+          <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
+        </el-form-item>
+        <el-form-item label="姓名" prop="name">
+          <el-input v-model="registerForm.name" placeholder="请输入真实姓名" />
         </el-form-item>
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="form.email"></el-input>
+          <el-input v-model="registerForm.email" placeholder="请输入邮箱" />
         </el-form-item>
-        <!-- Add more fields as needed -->
+        <el-form-item label="手机号" prop="phone">
+          <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
+        </el-form-item>
+        <el-form-item label="专业" prop="major">
+          <el-input v-model="registerForm.major" placeholder="请输入专业" />
+        </el-form-item>
+        <el-form-item label="毕业年份" prop="graduationYear">
+          <el-input-number v-model="registerForm.graduationYear" :min="2020" :max="2030" />
+        </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="handleSubmit" :loading="loading" style="width: 100%">注册</el-button>
+          <el-button type="primary" class="w-full" :loading="loading" @click="handleRegister">注册</el-button>
         </el-form-item>
+        <div class="text-center text-sm">
+          <router-link to="/login" class="text-blue-500 hover:underline">已有账号？去登录</router-link>
+        </div>
       </el-form>
     </el-card>
   </div>
@@ -36,40 +46,40 @@ import { registerStudent } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 
 const router = useRouter()
-const formRef = ref(null)
+const registerFormRef = ref(null)
 const loading = ref(false)
 
-const form = reactive({
-  studentId: '',
-  name: '',
+const registerForm = reactive({
+  username: '',
   password: '',
-  email: ''
+  name: '',
+  email: '',
+  phone: '',
+  major: '',
+  graduationYear: 2024
 })
 
 const rules = {
-  studentId: [{ required: true, message: '请输入学号', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  email: [{ required: true, message: '请输入邮箱', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
+  email: [
+    { required: true, message: '请输入邮箱', trigger: 'blur' },
+    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
+  ],
+  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }]
 }
 
-const handleSubmit = async () => {
-  if (!formRef.value) return
-  await formRef.value.validate(async (valid) => {
+const handleRegister = () => {
+  registerFormRef.value.validate(async valid => {
     if (valid) {
       loading.value = true
       try {
-        const payload = {
-          studentNo: form.studentId,
-          name: form.name,
-          password: form.password,
-          email: form.email
-        }
-        await registerStudent(payload)
+        await registerStudent(registerForm)
         ElMessage.success('注册成功，请登录')
         router.push('/login')
       } catch (error) {
-        // Error handled in request interceptor
+        console.error(error)
       } finally {
         loading.value = false
       }
@@ -80,18 +90,6 @@ const handleSubmit = async () => {
 
 <style scoped>
 .register-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f2f5;
-}
-.register-card {
-  width: 500px;
-}
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 </style>

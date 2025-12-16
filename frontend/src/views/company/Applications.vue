@@ -1,132 +1,60 @@
 <template>
-  <div class="page-container">
-    <h2>简历管理</h2>
-    
-    <el-card shadow="never">
+  <div class="company-applications p-6">
+    <el-card>
       <template #header>
-        <el-form :inline="true" :model="filters">
-          <el-form-item label="职位筛选">
-            <el-select v-model="filters.jobId" placeholder="全部职位" clearable style="width: 200px">
-              <el-option 
-                v-for="job in myJobs" 
-                :key="job.id" 
-                :label="job.title" 
-                :value="job.id"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态筛选">
-            <el-select v-model="filters.status" placeholder="全部状态" clearable style="width: 150px">
-              <el-option label="已投递" value="SUBMITTED" />
-              <el-option label="面试中" value="INTERVIEW" />
-              <el-option label="已录用" value="HIRED" />
-              <el-option label="已拒绝" value="REJECTED" />
-              <el-option label="已撤回" value="WITHDRAWN" />
-            </el-select>
-          </el-form-item>
-          <el-form-item>
-            <el-button type="primary" @click="fetchApplications">查询</el-button>
-          </el-form-item>
-        </el-form>
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold">收到简历</h2>
+        </div>
       </template>
 
-      <el-table :data="applications" v-loading="loading" style="width: 100%">
-        <el-table-column label="学生姓名" width="120">
+      <el-table :data="applications" style="width: 100%" v-loading="loading">
+        <el-table-column prop="job.title" label="应聘职位" />
+        <el-table-column prop="studentName" label="申请人" />
+        <el-table-column prop="resume.title" label="简历">
+           <template #default="scope">
+             <a :href="scope.row.resume.fileUrl" target="_blank" class="text-blue-500 hover:underline">{{ scope.row.resume.title }}</a>
+           </template>
+        </el-table-column>
+        <el-table-column prop="status" label="状态">
           <template #default="scope">
-            {{ scope.row.student?.name || '-' }}
+            <el-tag :type="getStatusType(scope.row.status)">{{ getStatusText(scope.row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="学号" width="130">
+        <el-table-column label="操作" width="300">
           <template #default="scope">
-            {{ scope.row.student?.studentNo || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="学院" width="150">
-          <template #default="scope">
-            {{ scope.row.student?.college || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="应聘职位" min-width="160">
-          <template #default="scope">
-            {{ scope.row.job?.title || '-' }}
-          </template>
-        </el-table-column>
-        <el-table-column label="投递时间" width="180">
-          <template #default="scope">
-            {{ formatDate(scope.row.createdAt) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="状态" width="100">
-          <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">
-              {{ getStatusLabel(scope.row.status) }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="240" fixed="right">
-          <template #default="scope">
-            <el-button size="small" @click="viewResume(scope.row)">查看简历</el-button>
-            <el-dropdown @command="(cmd) => handleStatusChange(scope.row, cmd)">
-              <el-button size="small" type="primary">
-                更新状态<el-icon class="el-icon--right"><arrow-down /></el-icon>
-              </el-button>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="INTERVIEW">邀请面试</el-dropdown-item>
-                  <el-dropdown-item command="HIRED">录用</el-dropdown-item>
-                  <el-dropdown-item command="REJECTED">拒绝</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
+            <div v-if="scope.row.status === 'PENDING'">
+              <el-button size="small" type="success" @click="handleStatus(scope.row, 'ACCEPTED')">通过</el-button>
+              <el-button size="small" type="danger" @click="handleStatus(scope.row, 'REJECTED')">拒绝</el-button>
+            </div>
+            <div v-if="scope.row.status === 'ACCEPTED'">
+               <el-button size="small" type="primary" @click="openInterviewDialog(scope.row)">安排面试</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
-
-      <el-empty v-if="!loading && applications.length === 0" description="暂无投递记录" />
     </el-card>
 
-    <!-- 简历详情对话框 -->
-    <el-dialog v-model="resumeDialogVisible" title="简历详情" width="70%">
-      <div v-if="currentResume" class="resume-detail">
-        <el-descriptions :column="2" border>
-          <el-descriptions-item label="姓名">{{ currentApplication?.student?.name }}</el-descriptions-item>
-          <el-descriptions-item label="学号">{{ currentApplication?.student?.studentNo }}</el-descriptions-item>
-          <el-descriptions-item label="学院">{{ currentApplication?.student?.college }}</el-descriptions-item>
-          <el-descriptions-item label="联系电话">{{ currentApplication?.student?.phone }}</el-descriptions-item>
-          <el-descriptions-item label="邮箱" :span="2">{{ currentApplication?.student?.email }}</el-descriptions-item>
-        </el-descriptions>
-
-        <el-divider />
-
-        <h3>{{ currentResume.title }}</h3>
-        
-        <div class="resume-section" v-if="currentResume.summary">
-          <h4>个人简介</h4>
-          <p>{{ currentResume.summary }}</p>
-        </div>
-
-        <div class="resume-section" v-if="currentResume.education">
-          <h4>教育经历</h4>
-          <p style="white-space: pre-wrap;">{{ currentResume.education }}</p>
-        </div>
-
-        <div class="resume-section" v-if="currentResume.experience">
-          <h4>工作/实习经历</h4>
-          <p style="white-space: pre-wrap;">{{ currentResume.experience }}</p>
-        </div>
-
-        <div class="resume-section" v-if="currentResume.skills">
-          <h4>技能特长</h4>
-          <p style="white-space: pre-wrap;">{{ currentResume.skills }}</p>
-        </div>
-
-        <div class="resume-section" v-if="currentApplication?.notes">
-          <h4>备注</h4>
-          <p>{{ currentApplication.notes }}</p>
-        </div>
-      </div>
+    <!-- Interview Dialog -->
+    <el-dialog v-model="interviewDialogVisible" title="安排面试" width="40%">
+      <el-form :model="interviewForm">
+        <el-form-item label="面试时间">
+           <el-date-picker
+            v-model="interviewForm.timeRange"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始时间"
+            end-placeholder="结束时间"
+          />
+        </el-form-item>
+        <el-form-item label="地点/方式">
+          <el-input v-model="interviewForm.location" placeholder="例如：腾讯会议号 123456" />
+        </el-form-item>
+      </el-form>
       <template #footer>
-        <el-button @click="resumeDialogVisible = false">关闭</el-button>
+        <span class="dialog-footer">
+          <el-button @click="interviewDialogVisible = false">取消</el-button>
+          <el-button type="primary" @click="scheduleInterview">确定</el-button>
+        </span>
       </template>
     </el-dialog>
   </div>
@@ -136,49 +64,21 @@
 import { ref, reactive, onMounted } from 'vue'
 import { companyApi } from '@/api/company'
 import { ElMessage } from 'element-plus'
-import { ArrowDown } from '@element-plus/icons-vue'
-import request from '@/api/request'
+import request from '@/api/request' // Import raw request for interview call if not in companyApi
 
-const loading = ref(false)
 const applications = ref([])
-const myJobs = ref([])
-const resumeDialogVisible = ref(false)
-const currentResume = ref(null)
-const currentApplication = ref(null)
-
-const filters = reactive({
-  jobId: null,
-  status: null
+const loading = ref(false)
+const interviewDialogVisible = ref(false)
+const currentApp = ref(null)
+const interviewForm = reactive({
+  timeRange: [],
+  location: ''
 })
-
-const statusMap = {
-  SUBMITTED: { label: '已投递', type: '' },
-  INTERVIEW: { label: '面试中', type: 'warning' },
-  HIRED: { label: '已录用', type: 'success' },
-  REJECTED: { label: '已拒绝', type: 'danger' },
-  WITHDRAWN: { label: '已撤回', type: 'info' }
-}
-
-const getStatusLabel = (status) => statusMap[status]?.label || status
-const getStatusType = (status) => statusMap[status]?.type || 'info'
-
-const fetchMyJobs = async () => {
-  try {
-    const data = await request({ url: '/companies/me/jobs', method: 'get' })
-    myJobs.value = data || []
-  } catch (error) {
-    console.error(error)
-  }
-}
 
 const fetchApplications = async () => {
   loading.value = true
   try {
-    const params = {}
-    if (filters.jobId) params.jobId = filters.jobId
-    if (filters.status) params.status = filters.status
-    
-    const data = await companyApi.listApplications(params)
+    const data = await companyApi.listApplications()
     applications.value = data || []
   } catch (error) {
     console.error(error)
@@ -187,75 +87,68 @@ const fetchApplications = async () => {
   }
 }
 
-const viewResume = async (application) => {
+const handleStatus = async (row, status) => {
   try {
-    currentApplication.value = application
-    // 获取简历详情
-    const resumeId = application.resume?.id || application.resumeId
-    if (resumeId) {
-      const data = await request({ url: `/resumes/${resumeId}`, method: 'get' })
-      currentResume.value = data
-      resumeDialogVisible.value = true
-      
-      // 查看简历不自动更改状态
-    } else {
-      ElMessage.warning('该投递没有关联简历')
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-const handleStatusChange = async (application, newStatus, showMessage = true) => {
-  try {
-    await request({
-      url: `/applications/${application.id}/status`,
-      method: 'put',
-      data: { status: newStatus }
-    })
-    if (showMessage) {
-      ElMessage.success('状态已更新')
-    }
+    await companyApi.updateApplicationStatus(row.id, { status })
+    ElMessage.success('操作成功')
     fetchApplications()
   } catch (error) {
     console.error(error)
   }
 }
 
-const formatDate = (date) => {
-  if (!date) return '-'
-  return new Date(date).toLocaleString('zh-CN')
+const openInterviewDialog = (row) => {
+  currentApp.value = row
+  interviewForm.timeRange = []
+  interviewForm.location = ''
+  interviewDialogVisible.value = true
+}
+
+const scheduleInterview = async () => {
+  if (!interviewForm.timeRange || interviewForm.timeRange.length !== 2) {
+    ElMessage.warning('请选择面试时间')
+    return
+  }
+  try {
+    // Call interview API manually since it might not be in companyApi helper
+    await request({
+      url: '/interviews',
+      method: 'post',
+      data: {
+        applicationId: currentApp.value.id,
+        startTime: interviewForm.timeRange[0],
+        endTime: interviewForm.timeRange[1],
+        location: interviewForm.location
+      }
+    })
+    ElMessage.success('面试安排成功')
+    interviewDialogVisible.value = false
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getStatusType = (status) => {
+  const map = {
+    'PENDING': 'info',
+    'ACCEPTED': 'success',
+    'REJECTED': 'danger',
+    'WITHDRAWN': 'warning'
+  }
+  return map[status] || 'info'
+}
+
+const getStatusText = (status) => {
+  const map = {
+    'PENDING': '待处理',
+    'ACCEPTED': '初筛通过',
+    'REJECTED': '不合适',
+    'WITHDRAWN': '已撤回'
+  }
+  return map[status] || status
 }
 
 onMounted(() => {
-  fetchMyJobs()
   fetchApplications()
 })
 </script>
-
-<style scoped>
-.page-container {
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.resume-detail {
-  padding: 20px;
-}
-
-.resume-section {
-  margin-top: 20px;
-}
-
-.resume-section h4 {
-  color: #303133;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
-.resume-section p {
-  color: #606266;
-  line-height: 1.8;
-  margin: 0;
-}
-</style>

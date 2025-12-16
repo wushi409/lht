@@ -1,33 +1,32 @@
 <template>
-  <div class="page-container">
-    <h2>我的投递记录</h2>
-    <el-card shadow="never">
+  <div class="applications-container p-6">
+    <el-card>
+      <template #header>
+        <div class="flex justify-between items-center">
+          <h2 class="text-xl font-bold">我的申请</h2>
+        </div>
+      </template>
+
       <el-table :data="applications" style="width: 100%" v-loading="loading">
-        <el-table-column label="职位名称" min-width="160">
+        <el-table-column prop="job.title" label="职位" />
+        <el-table-column prop="job.companyName" label="公司" />
+        <el-table-column prop="status" label="状态">
           <template #default="scope">
-            {{ scope.row.job?.title || '-' }}
+            <el-tag :type="getStatusType(scope.row.status)">{{ getStatusText(scope.row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="公司名称" min-width="160">
+        <el-table-column prop="createdAt" label="申请时间">
           <template #default="scope">
-            {{ scope.row.job?.company?.name || '-' }}
+             {{ new Date(scope.row.createdAt).toLocaleDateString() }}
           </template>
         </el-table-column>
-        <el-table-column prop="createdAt" label="投递时间" width="200" />
-        <el-table-column prop="status" label="状态" width="120">
+        <el-table-column label="操作">
           <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">{{ getStatusLabel(scope.row.status) }}</el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="140">
-          <template #default="scope">
-            <el-button 
-              v-if="scope.row.status === 'SUBMITTED'" 
-              type="danger" 
-              link 
-              @click="handleWithdraw(scope.row)"
-            >撤回</el-button>
-             <span v-else>-</span>
+            <el-popconfirm title="确定撤回申请吗？" @confirm="handleWithdraw(scope.row.id)" v-if="scope.row.status === 'PENDING'">
+              <template #reference>
+                <el-button size="small" type="danger">撤回</el-button>
+              </template>
+            </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
@@ -38,19 +37,10 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getMyApplications, withdrawApplication } from '@/api/student'
-import { ElMessage, ElMessageBox } from 'element-plus'
-import { ApplicationStatus } from '@/stores/dict'
+import { ElMessage } from 'element-plus'
 
 const applications = ref([])
 const loading = ref(false)
-
-const getStatusLabel = (status) => {
-  return ApplicationStatus[status]?.label || status
-}
-
-const getStatusType = (status) => {
-  return ApplicationStatus[status]?.type || 'info'
-}
 
 const fetchApplications = async () => {
   loading.value = true
@@ -64,36 +54,37 @@ const fetchApplications = async () => {
   }
 }
 
-const handleWithdraw = (row) => {
-  ElMessageBox.confirm(
-    '确定要撤回这条投递申请吗？撤回后可能无法再次投递该职位。',
-    '警告',
-    {
-      confirmButtonText: '撤回',
-      cancelButtonText: '取消',
-      type: 'warning',
-    }
-  )
-    .then(async () => {
-      try {
-        await withdrawApplication(row.id)
-        ElMessage.success('已撤回')
-        fetchApplications()
-      } catch (error) {
-        console.error(error)
-      }
-    })
-    .catch(() => {})
+const handleWithdraw = async (id) => {
+  try {
+    await withdrawApplication(id)
+    ElMessage.success('撤回成功')
+    fetchApplications()
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+const getStatusType = (status) => {
+  const map = {
+    'PENDING': 'info',
+    'ACCEPTED': 'success',
+    'REJECTED': 'danger',
+    'WITHDRAWN': 'warning'
+  }
+  return map[status] || 'info'
+}
+
+const getStatusText = (status) => {
+  const map = {
+    'PENDING': '待处理',
+    'ACCEPTED': '已通过',
+    'REJECTED': '已拒绝',
+    'WITHDRAWN': '已撤回'
+  }
+  return map[status] || status
 }
 
 onMounted(() => {
   fetchApplications()
 })
 </script>
-
-<style scoped>
-.page-container {
-  max-width: 1000px;
-  margin: 0 auto;
-}
-</style>

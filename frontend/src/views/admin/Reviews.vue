@@ -1,9 +1,11 @@
 <template>
-  <div class="p-6">
-    <h1 class="text-2xl font-bold mb-4">Reviews</h1>
-    <p>Manage reviews here.</p>
+  <div class="admin-reviews p-6">
+    <el-card header="评价管理">
+       <el-empty description="暂无评价数据" />
+    </el-card>
   </div>
 </template>
 
 <script setup>
+// Placeholder for reviews management
 </script>
