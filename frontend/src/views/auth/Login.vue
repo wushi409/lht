@@ -71,21 +71,25 @@ const handleLogin = async () => {
     if (valid) {
       loading.value = true
       try {
-        await userStore.loginAction(loginForm)
+        const result = await userStore.loginAction(loginForm)
+        console.log('登录返回数据:', result)
+        console.log('Token:', userStore.token)
+        console.log('Role:', userStore.role)
         ElMessage.success('登录成功')
         // Redirect based on role
         const role = userStore.role
         if (role === 'STUDENT') {
-          router.push('/student')
+          router.push('/student/dashboard')
         } else if (role === 'COMPANY') {
-          router.push('/company')
+          router.push('/company/dashboard')
         } else if (role === 'ADMIN') {
-          router.push('/admin')
+          router.push('/admin/dashboard')
         } else {
           router.push('/')
         }
       } catch (error) {
-        console.error(error)
+        console.error('登录错误:', error)
+        ElMessage.error(error.message || '登录失败')
       } finally {
         loading.value = false
       }

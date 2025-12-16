@@ -45,6 +45,10 @@ public class EventService {
         return jobFairEventRepository.findByJobFair(fair);
     }
 
+    public List<JobFairEvent> listAllEvents() {
+        return jobFairEventRepository.findAll();
+    }
+
     @Transactional
     public EventRegistration register(String studentUsername, EventRegistrationRequest req) {
         Student student = studentRepository.findByStudentNo(studentUsername)
@@ -80,9 +84,58 @@ public class EventService {
         return eventRegistrationRepository.save(registration);
     }
 
+    @Transactional
+    public EventRegistration cancelCheckIn(Long registrationId) {
+        EventRegistration registration = eventRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报名不存在"));
+        registration.setStatus(RegistrationStatus.REGISTERED);
+        registration.setCheckinTime(null);
+        return eventRegistrationRepository.save(registration);
+    }
+
+    @Transactional(readOnly = true)
     public List<EventRegistration> listMyRegistrations(String studentUsername) {
         Student student = studentRepository.findByStudentNo(studentUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
-        return eventRegistrationRepository.findByStudent(student);
+        List<EventRegistration> registrations = eventRegistrationRepository.findByStudent(student);
+        // 强制加载关联对象
+        for (EventRegistration reg : registrations) {
+            if (reg.getEvent() != null) {
+                reg.getEvent().getName();
+            }
+        }
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventRegistration> listRegistrationsByEvent(Long eventId) {
+        JobFairEvent event = jobFairEventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在"));
+        List<EventRegistration> registrations = eventRegistrationRepository.findByEvent(event);
+        // 强制加载关联对象
+        for (EventRegistration reg : registrations) {
+            if (reg.getStudent() != null) {
+                reg.getStudent().getName();
+                reg.getStudent().getStudentNo();
+                reg.getStudent().getCollege();
+            }
+        }
+        return registrations;
+    }
+
+    @Transactional
+    public void cancelRegistration(String studentUsername, Long registrationId) {
+        Student student = studentRepository.findByStudentNo(studentUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
+        EventRegistration registration = eventRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报名不存在"));
+        if (!registration.getStudent().getId().equals(student.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权取消该报名");
+        }
+        if (registration.getStatus() == RegistrationStatus.CHECKED_IN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已签到，无法取消");
+        }
+        registration.setStatus(RegistrationStatus.CANCELLED);
+        eventRegistrationRepository.save(registration);
     }
 }

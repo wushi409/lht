@@ -2,8 +2,9 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
+// 动态基础地址：优先使用环境变量 VITE_API_BASE，其次回退到本地后端默认端口
 const service = axios.create({
-  baseURL: '/api',
+  baseURL: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:8080',
   timeout: 10000
 })
 
@@ -21,6 +22,7 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   response => {
     const res = response.data
+    console.log('API 响应:', res)
     if (res && Object.prototype.hasOwnProperty.call(res, 'success')) {
       if (!res.success) {
         ElMessage.error(res.message || '请求失败')

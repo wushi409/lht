@@ -46,6 +46,10 @@ public class ReviewService {
         return reviewRepository.findByCompany(company);
     }
 
+    public List<Review> listAll() {
+        return reviewRepository.findAll();
+    }
+
     @Transactional
     public Review create(String username, ReviewRequest req) {
         Student student = getStudent(username);

@@ -59,7 +59,13 @@ const handleSubmit = async () => {
     if (valid) {
       loading.value = true
       try {
-        await registerStudent(form)
+        const payload = {
+          studentNo: form.studentId,
+          name: form.name,
+          password: form.password,
+          email: form.email
+        }
+        await registerStudent(payload)
         ElMessage.success('注册成功，请登录')
         router.push('/login')
       } catch (error) {

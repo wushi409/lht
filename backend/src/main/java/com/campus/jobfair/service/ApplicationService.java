@@ -42,10 +42,24 @@ public class ApplicationService {
         this.notificationService = notificationService;
     }
 
+    @Transactional(readOnly = true)
     public List<ApplicationRecord> listMyApplications(String studentUsername) {
         Student student = studentRepository.findByStudentNo(studentUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
-        return applicationRecordRepository.findByStudent(student);
+        List<ApplicationRecord> applications = applicationRecordRepository.findByStudent(student);
+        // 强制加载懒加载的关联对象
+        applications.forEach(app -> {
+            if (app.getJob() != null) {
+                app.getJob().getTitle(); // 触发加载
+                if (app.getJob().getCompany() != null) {
+                    app.getJob().getCompany().getName(); // 触发加载
+                }
+            }
+            if (app.getResume() != null) {
+                app.getResume().getTitle(); // 触发加载
+            }
+        });
+        return applications;
     }
 
     @Transactional

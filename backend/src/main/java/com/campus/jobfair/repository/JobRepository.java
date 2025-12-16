@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import com.campus.jobfair.entity.Company;
 
 public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByStatus(JobStatus status);
@@ -22,4 +23,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("select j from Job j where lower(j.title) like lower(concat('%', :keyword, '%')) " +
             "or lower(j.company.name) like lower(concat('%', :keyword, '%'))")
     List<Job> searchByKeyword(@Param("keyword") String keyword);
+
+    // 企业维度查询
+    List<Job> findByCompany(Company company);
 }

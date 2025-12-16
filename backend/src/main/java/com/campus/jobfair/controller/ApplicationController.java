@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,7 +26,7 @@ public class ApplicationController {
     }
 
     @PreAuthorize("hasAnyRole('COMPANY','ADMIN')")
-    @PostMapping("/{id}/status")
+    @RequestMapping(value = "/{id}/status", method = {org.springframework.web.bind.annotation.RequestMethod.POST, org.springframework.web.bind.annotation.RequestMethod.PUT})
     public ResponseEntity<ApiResponse<ApplicationRecord>> updateStatus(@AuthenticationPrincipal CustomUserDetails user,
                                                                        @PathVariable Long id,
                                                                        @RequestBody ApplicationStatusUpdateRequest request) {

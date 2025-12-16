@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/db/schema-mysql.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema-mysql.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ApplicationController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ApplicationController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ResumeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ResumeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ReviewController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/ReviewController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StatsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StatsController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StudentController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Company.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Company.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Job.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Job.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/repository/JobRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/repository/JobRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ApplicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ApplicationService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/BoothService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/BoothService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/InterviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/InterviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ResumeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ResumeService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ReviewService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ReviewService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/StatsService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/StatsService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/StatsService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/StatsService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/jobfair-backend-0.0.1-SNAPSHOT.jar" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/jobfair-backend-0.0.1-SNAPSHOT.jar.original" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/maven-archiver/pom.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/api/request.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/api/request.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/router/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/auth/RegisterCompany.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/auth/RegisterCompany.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/auth/RegisterStudent.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/auth/RegisterStudent.vue" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 8
+}]]></component>
+  <component name="ProjectId" id="36ulNo7oxszMEcInRekSOIjzUj4" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "Spring Boot.JobFairApplication.executor": "Run",
+    "git-widget-placeholder": "master",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/毕设/lht/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="JobFairApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+      <module name="jobfair-backend" />
+      <option name="SPRING_BOOT_MAIN_CLASS" value="com.campus.jobfair.JobFairApplication" />
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-bf35d07a577b-intellij.indexing.shared.core-IU-252.27397.103" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-IU-252.27397.103" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="默认任务">
+      <changelist id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="" />
+      <created>1765864300100</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1765864300100</updated>
+      <workItem from="1765864301831" duration="10924000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>

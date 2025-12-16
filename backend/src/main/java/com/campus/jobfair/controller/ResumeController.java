@@ -38,6 +38,12 @@ public class ResumeController {
         return ResponseEntity.ok(ApiResponse.ok(resumeService.listMyResumes(user.getUsername())));
     }
 
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'COMPANY', 'ADMIN')")
+    public ResponseEntity<ApiResponse<Resume>> get(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(resumeService.getById(id)));
+    }
+
     @PostMapping
     public ResponseEntity<ApiResponse<Resume>> create(@AuthenticationPrincipal CustomUserDetails user,
                                                       @Valid @RequestBody ResumeRequest request) {

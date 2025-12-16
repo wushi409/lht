@@ -2,6 +2,7 @@ package com.campus.jobfair.entity;
 
 import com.campus.jobfair.entity.enums.CompanyStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,6 +16,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "companies")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Company extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 200)

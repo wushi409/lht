@@ -66,12 +66,34 @@ public class InterviewService {
         return saved;
     }
 
+    @Transactional(readOnly = true)
     public List<Interview> listForCompany(String companyUsername) {
-        return interviewRepository.findByJobCompanyCreditCode(companyUsername);
+        List<Interview> interviews = interviewRepository.findByJobCompanyCreditCode(companyUsername);
+        // 强制加载关联对象
+        for (Interview interview : interviews) {
+            if (interview.getStudent() != null) {
+                interview.getStudent().getName();
+            }
+            if (interview.getJob() != null) {
+                interview.getJob().getTitle();
+            }
+        }
+        return interviews;
     }
 
+    @Transactional(readOnly = true)
     public List<Interview> listForStudent(Long studentId) {
-        return interviewRepository.findByStudentId(studentId);
+        List<Interview> interviews = interviewRepository.findByStudentId(studentId);
+        // 强制加载关联对象
+        for (Interview interview : interviews) {
+            if (interview.getJob() != null) {
+                interview.getJob().getTitle();
+                if (interview.getJob().getCompany() != null) {
+                    interview.getJob().getCompany().getName();
+                }
+            }
+        }
+        return interviews;
     }
 
     @Transactional

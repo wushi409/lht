@@ -3,16 +3,19 @@ package com.campus.jobfair.controller;
 import com.campus.jobfair.dto.ApiResponse;
 import com.campus.jobfair.dto.ApplicationRequest;
 import com.campus.jobfair.dto.EventRegistrationRequest;
+import com.campus.jobfair.dto.ResumeRequest;
 import com.campus.jobfair.dto.StudentProfileUpdateRequest;
 import com.campus.jobfair.entity.ApplicationRecord;
 import com.campus.jobfair.entity.EventRegistration;
 import com.campus.jobfair.entity.FavoriteCompany;
 import com.campus.jobfair.entity.FavoriteJob;
+import com.campus.jobfair.entity.Resume;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.security.CustomUserDetails;
 import com.campus.jobfair.service.ApplicationService;
 import com.campus.jobfair.service.EventService;
 import com.campus.jobfair.service.FavoriteService;
+import com.campus.jobfair.service.ResumeService;
 import com.campus.jobfair.service.StudentService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -37,15 +40,18 @@ public class StudentController {
     private final ApplicationService applicationService;
     private final FavoriteService favoriteService;
     private final EventService eventService;
+    private final ResumeService resumeService;
 
     public StudentController(StudentService studentService,
                              ApplicationService applicationService,
                              FavoriteService favoriteService,
-                             EventService eventService) {
+                             EventService eventService,
+                             ResumeService resumeService) {
         this.studentService = studentService;
         this.applicationService = applicationService;
         this.favoriteService = favoriteService;
         this.eventService = eventService;
+        this.resumeService = resumeService;
     }
 
     @GetMapping("/me")
@@ -122,5 +128,57 @@ public class StudentController {
     @GetMapping("/me/events")
     public ResponseEntity<ApiResponse<List<EventRegistration>>> myEvents(@AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listMyRegistrations(user.getUsername())));
+    }
+
+    // 简历管理
+    @GetMapping("/me/resumes")
+    public ResponseEntity<ApiResponse<List<Resume>>> myResumes(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.ok(resumeService.listMyResumes(user.getUsername())));
+    }
+
+    @PostMapping("/me/resumes")
+    public ResponseEntity<ApiResponse<Resume>> createResume(@AuthenticationPrincipal CustomUserDetails user,
+                                                            @Valid @RequestBody ResumeRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(resumeService.create(user.getUsername(), request)));
+    }
+
+    @PutMapping("/me/resumes/{id}")
+    public ResponseEntity<ApiResponse<Resume>> updateResume(@AuthenticationPrincipal CustomUserDetails user,
+                                                            @PathVariable Long id,
+                                                            @Valid @RequestBody ResumeRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(resumeService.update(user.getUsername(), id, request)));
+    }
+
+    @DeleteMapping("/me/resumes/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteResume(@AuthenticationPrincipal CustomUserDetails user,
+                                                          @PathVariable Long id) {
+        resumeService.delete(user.getUsername(), id);
+        return ResponseEntity.ok(ApiResponse.ok("删除成功", null));
+    }
+
+    @PutMapping("/me/resumes/{id}/default")
+    public ResponseEntity<ApiResponse<Void>> setDefaultResume(@AuthenticationPrincipal CustomUserDetails user,
+                                                              @PathVariable Long id) {
+        resumeService.setDefault(user.getUsername(), id);
+        return ResponseEntity.ok(ApiResponse.ok("已设为默认", null));
+    }
+
+    // 活动报名（兼容前端路由）
+    @GetMapping("/me/registrations")
+    public ResponseEntity<ApiResponse<List<EventRegistration>>> myRegistrations(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.listMyRegistrations(user.getUsername())));
+    }
+
+    @PostMapping("/me/registrations")
+    public ResponseEntity<ApiResponse<EventRegistration>> createRegistration(@AuthenticationPrincipal CustomUserDetails user,
+                                                                             @Valid @RequestBody EventRegistrationRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.register(user.getUsername(), request)));
+    }
+
+    @DeleteMapping("/me/registrations/{id}")
+    public ResponseEntity<ApiResponse<Void>> cancelRegistration(@AuthenticationPrincipal CustomUserDetails user,
+                                                                @PathVariable Long id) {
+        eventService.cancelRegistration(user.getUsername(), id);
+        return ResponseEntity.ok(ApiResponse.ok("取消报名成功", null));
     }
 }

@@ -1,76 +1,141 @@
 <template>
-  <div class="page-container">
-    <el-card shadow="never">
+  <div class="profile-container">
+    <el-card>
       <template #header>
         <div class="card-header">
-          <div>
-            <span style="font-size: 16px; font-weight: 600; margin-right: 12px">企业信息</span>
-            <el-tag :type="statusTag.type">{{ statusTag.label }}</el-tag>
-            <span v-if="form?.rejectionReason" class="reject-reason">驳回原因：{{ form.rejectionReason }}</span>
+          <span>企业信息</span>
+          <el-button type="primary" size="small" @click="editMode = true" v-if="!editMode">编辑</el-button>
+          <div v-else>
+            <el-button size="small" @click="cancelEdit">取消</el-button>
+            <el-button type="primary" size="small" @click="saveProfile" :loading="saving">保存</el-button>
           </div>
-          <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
         </div>
       </template>
 
-      <el-form v-if="form" :model="form" label-width="120px" class="form-body">
-        <el-form-item label="企业名称">
-          <el-input v-model="form.name" />
+      <el-form :model="companyInfo" label-width="120px" :disabled="!editMode" v-loading="loading">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="企业名称">
+              <el-input v-model="companyInfo.name" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="信用代码">
+              <el-input v-model="companyInfo.creditCode" disabled />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="企业规模">
+              <el-select v-model="companyInfo.scale" placeholder="请选择" style="width: 100%">
+                <el-option label="0-20人" value="0-20人" />
+                <el-option label="20-99人" value="20-99人" />
+                <el-option label="100-499人" value="100-499人" />
+                <el-option label="500-999人" value="500-999人" />
+                <el-option label="1000人以上" value="1000人以上" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="所属行业">
+              <el-select v-model="companyInfo.industry" placeholder="请选择" style="width: 100%">
+                <el-option label="互联网" value="互联网" />
+                <el-option label="金融" value="金融" />
+                <el-option label="教育" value="教育" />
+                <el-option label="制造业" value="制造业" />
+                <el-option label="房地产" value="房地产" />
+                <el-option label="医疗健康" value="医疗健康" />
+                <el-option label="其他" value="其他" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-form-item label="企业简介">
+          <el-input 
+            v-model="companyInfo.description" 
+            type="textarea" 
+            :rows="4"
+            placeholder="请输入企业简介"
+          />
         </el-form-item>
-        <el-form-item label="统一社会信用码">
-          <el-input v-model="form.creditCode" disabled />
-        </el-form-item>
-        <el-form-item label="规模">
-          <el-input v-model="form.scale" placeholder="如：100-500人" />
-        </el-form-item>
-        <el-form-item label="行业">
-          <el-input v-model="form.industry" placeholder="如：互联网" />
-        </el-form-item>
-        <el-form-item label="公司简介">
-          <el-input v-model="form.description" type="textarea" :rows="4" />
-        </el-form-item>
-        <el-form-item label="Logo链接">
-          <el-input v-model="form.logoUrl" />
-        </el-form-item>
-        <el-form-item label="联系人">
-          <el-input v-model="form.contactName" />
-        </el-form-item>
-        <el-form-item label="联系电话">
-          <el-input v-model="form.contactPhone" />
-        </el-form-item>
-        <el-form-item label="联系邮箱">
-          <el-input v-model="form.contactEmail" />
+
+        <el-divider content-position="left">联系人信息</el-divider>
+
+        <el-row :gutter="20">
+          <el-col :span="8">
+            <el-form-item label="联系人">
+              <el-input v-model="companyInfo.contactName" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="联系电话">
+              <el-input v-model="companyInfo.contactPhone" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="8">
+            <el-form-item label="联系邮箱">
+              <el-input v-model="companyInfo.contactEmail" />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-divider content-position="left">审核状态</el-divider>
+
+        <el-form-item label="审核状态">
+          <el-tag :type="getStatusType(companyInfo.status)" size="large">
+            {{ getStatusLabel(companyInfo.status) }}
+          </el-tag>
+          <span v-if="companyInfo.rejectionReason" style="margin-left: 20px; color: #F56C6C">
+            拒绝原因：{{ companyInfo.rejectionReason }}
+          </span>
         </el-form-item>
       </el-form>
-      <el-skeleton v-else :rows="8" animated />
     </el-card>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, reactive, onMounted } from 'vue'
 import { companyApi } from '@/api/company'
+import { ElMessage } from 'element-plus'
 
-const form = ref(null)
 const loading = ref(false)
 const saving = ref(false)
+const editMode = ref(false)
+
+const companyInfo = reactive({
+  name: '',
+  creditCode: '',
+  scale: '',
+  industry: '',
+  description: '',
+  contactName: '',
+  contactPhone: '',
+  contactEmail: '',
+  status: '',
+  rejectionReason: ''
+})
+
+const originalInfo = reactive({})
 
 const statusMap = {
   PENDING: { label: '待审核', type: 'warning' },
   APPROVED: { label: '已通过', type: 'success' },
-  REJECTED: { label: '已驳回', type: 'danger' }
+  REJECTED: { label: '已拒绝', type: 'danger' }
 }
 
-const statusTag = computed(() => {
-  const status = form.value?.status || 'PENDING'
-  return statusMap[status] || { label: status, type: 'info' }
-})
+const getStatusLabel = (status) => statusMap[status]?.label || status
+const getStatusType = (status) => statusMap[status]?.type || 'info'
 
 const fetchProfile = async () => {
   loading.value = true
   try {
     const data = await companyApi.getProfile()
-    form.value = data
+    Object.assign(companyInfo, data)
+    Object.assign(originalInfo, data)
   } catch (error) {
     console.error(error)
   } finally {
@@ -78,27 +143,30 @@ const fetchProfile = async () => {
   }
 }
 
-const handleSave = async () => {
-  if (!form.value) return
+const saveProfile = async () => {
   saving.value = true
   try {
     await companyApi.updateProfile({
-      name: form.value.name,
-      scale: form.value.scale,
-      industry: form.value.industry,
-      description: form.value.description,
-      logoUrl: form.value.logoUrl,
-      contactName: form.value.contactName,
-      contactPhone: form.value.contactPhone,
-      contactEmail: form.value.contactEmail
+      scale: companyInfo.scale,
+      industry: companyInfo.industry,
+      description: companyInfo.description,
+      contactName: companyInfo.contactName,
+      contactPhone: companyInfo.contactPhone,
+      contactEmail: companyInfo.contactEmail
     })
     ElMessage.success('保存成功')
-    await fetchProfile()
+    editMode.value = false
+    Object.assign(originalInfo, companyInfo)
   } catch (error) {
     console.error(error)
   } finally {
     saving.value = false
   }
+}
+
+const cancelEdit = () => {
+  Object.assign(companyInfo, originalInfo)
+  editMode.value = false
 }
 
 onMounted(() => {
@@ -107,20 +175,14 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.page-container {
+.profile-container {
   max-width: 900px;
   margin: 0 auto;
 }
+
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-.form-body {
-  max-width: 700px;
-}
-.reject-reason {
-  margin-left: 12px;
-  color: #f56c6c;
 }
 </style>

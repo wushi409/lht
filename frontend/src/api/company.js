@@ -2,35 +2,72 @@ import request from './request'
 
 export const companyApi = {
   getProfile() {
-    return request.get('/companies/me')
+    return request({
+      url: '/companies/me',
+      method: 'get'
+    })
   },
 
   updateProfile(data) {
-    return request.put('/companies/me', data)
+    return request({
+      url: '/companies/me',
+      method: 'put',
+      data
+    })
   },
 
   createJob(data) {
-    return request.post('/jobs', data)
+    return request({
+      url: '/companies/me/jobs',
+      method: 'post',
+      data
+    })
   },
 
   updateJob(id, data) {
-    return request.put(`/jobs/${id}`, data)
+    return request({
+      url: `/companies/me/jobs/${id}`,
+      method: 'put',
+      data
+    })
   },
 
   changeJobStatus(id, status) {
-    return request.post(`/jobs/${id}/status`, null, { params: { status } })
+    return request({
+      url: `/companies/me/jobs/${id}/status`,
+      method: 'post',
+      params: { status }
+    })
   },
 
   updateApplicationStatus(id, data) {
-    return request.post(`/applications/${id}/status`, data)
+    return request({
+      url: `/applications/${id}/status`,
+      method: 'put',
+      data
+    })
+  },
+
+  listApplications(params) {
+    return request({
+      url: '/companies/me/applications',
+      method: 'get',
+      params
+    })
   },
 
   getCompany(id) {
-    return request.get(`/companies/${id}`)
+    return request({
+      url: `/companies/${id}`,
+      method: 'get'
+    })
   },
 
   listApproved() {
-    return request.get('/companies')
+    return request({
+      url: '/companies',
+      method: 'get'
+    })
   }
 }
 

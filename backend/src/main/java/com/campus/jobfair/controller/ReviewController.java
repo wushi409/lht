@@ -34,6 +34,12 @@ public class ReviewController {
         return ResponseEntity.ok(ApiResponse.ok(reviewService.listVisibleByCompany(id)));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/reviews")
+    public ResponseEntity<ApiResponse<List<Review>>> listAll() {
+        return ResponseEntity.ok(ApiResponse.ok(reviewService.listAll()));
+    }
+
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/reviews")
     public ResponseEntity<ApiResponse<Review>> create(@AuthenticationPrincipal CustomUserDetails user,

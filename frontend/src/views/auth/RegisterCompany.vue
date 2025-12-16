@@ -68,7 +68,15 @@ const handleSubmit = async () => {
     if (valid) {
       loading.value = true
       try {
-        await registerCompany(form)
+        const payload = {
+          name: form.companyName,
+          creditCode: form.licenseCode,
+          contactName: form.contactPerson,
+          contactPhone: form.contactPhone,
+          contactEmail: form.email,
+          password: form.password
+        }
+        await registerCompany(payload)
         ElMessage.success('申请提交成功，请等待管理员审核')
         router.push('/login')
       } catch (error) {

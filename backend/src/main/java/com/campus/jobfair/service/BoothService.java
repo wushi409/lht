@@ -35,6 +35,21 @@ public class BoothService {
         return boothRepository.findByJobFair(fair);
     }
 
+    @Transactional(readOnly = true)
+    public List<Booth> listAll() {
+        List<Booth> booths = boothRepository.findAll();
+        // 强制加载关联对象
+        for (Booth booth : booths) {
+            if (booth.getCompany() != null) {
+                booth.getCompany().getName();
+            }
+            if (booth.getJobFair() != null) {
+                booth.getJobFair().getName();
+            }
+        }
+        return booths;
+    }
+
     @Transactional
     public Booth create(BoothRequest request) {
         JobFair fair = jobFairRepository.findById(request.getJobFairId())
@@ -56,6 +71,15 @@ public class BoothService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "展位不存在"));
         booth.setCheckedIn(true);
         booth.setCheckinTime(Instant.now());
+        return boothRepository.save(booth);
+    }
+
+    @Transactional
+    public Booth cancelCheckIn(Long boothId) {
+        Booth booth = boothRepository.findById(boothId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "展位不存在"));
+        booth.setCheckedIn(false);
+        booth.setCheckinTime(null);
         return boothRepository.save(booth);
     }
 }

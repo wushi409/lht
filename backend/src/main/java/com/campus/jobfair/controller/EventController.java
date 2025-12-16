@@ -29,6 +29,11 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listJobFairs()));
     }
 
+    @GetMapping("/events")
+    public ResponseEntity<ApiResponse<List<JobFairEvent>>> listAllEvents() {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.listAllEvents()));
+    }
+
     @GetMapping("/job-fairs/{id}/events")
     public ResponseEntity<ApiResponse<List<JobFairEvent>>> listEvents(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listEventsByFair(id)));

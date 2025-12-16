@@ -47,6 +47,17 @@ public class ResumeService {
         return resumeRepository.findByStudent(getStudent(username));
     }
 
+    @Transactional(readOnly = true)
+    public Resume getById(Long resumeId) {
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "简历不存在"));
+        // 强制加载关联对象
+        if (resume.getStudent() != null) {
+            resume.getStudent().getName();
+        }
+        return resume;
+    }
+
     @Transactional
     public Resume create(String username, ResumeRequest request) {
         Student student = getStudent(username);
