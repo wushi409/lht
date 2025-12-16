@@ -85,6 +85,26 @@ public class EventService {
     }
 
     @Transactional
+    public EventRegistration selfCheckIn(String studentUsername, Long registrationId) {
+        Student student = studentRepository.findByStudentNo(studentUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
+        EventRegistration registration = eventRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报名不存在"));
+        if (!registration.getStudent().getId().equals(student.getId())) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权签到该报名");
+        }
+        if (registration.getStatus() == RegistrationStatus.CHECKED_IN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已签到");
+        }
+        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "报名已取消");
+        }
+        registration.setStatus(RegistrationStatus.CHECKED_IN);
+        registration.setCheckinTime(Instant.now());
+        return eventRegistrationRepository.save(registration);
+    }
+
+    @Transactional
     public EventRegistration cancelCheckIn(Long registrationId) {
         EventRegistration registration = eventRegistrationRepository.findById(registrationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报名不存在"));

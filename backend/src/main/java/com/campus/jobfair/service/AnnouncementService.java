@@ -39,4 +39,26 @@ public class AnnouncementService {
         announcement.setPinned(request.isPinned());
         return announcementRepository.save(announcement);
     }
+
+    @Transactional
+    public Announcement update(Long id, AnnouncementRequest request) {
+        Announcement announcement = getById(id);
+        announcement.setTitle(request.getTitle());
+        announcement.setContent(request.getContent());
+        announcement.setTarget(request.getTarget());
+        if (request.getPublishAt() != null) {
+            announcement.setPublishAt(Instant.parse(request.getPublishAt()));
+        }
+        if (request.getExpireAt() != null) {
+            announcement.setExpireAt(Instant.parse(request.getExpireAt()));
+        }
+        announcement.setPinned(request.isPinned());
+        return announcementRepository.save(announcement);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        Announcement announcement = getById(id);
+        announcementRepository.delete(announcement);
+    }
 }

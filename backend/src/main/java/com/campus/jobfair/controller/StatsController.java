@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/admin/stats")
-@PreAuthorize("hasRole('ADMIN')")
 public class StatsController {
 
     private final StatsService statsService;
@@ -21,37 +19,50 @@ public class StatsController {
         this.statsService = statsService;
     }
 
-    @GetMapping("/summary")
+    // 公开接口 - 首页统计
+    @GetMapping("/public/stats")
+    public ResponseEntity<ApiResponse<Map<String, Object>>> publicStats() {
+        return ResponseEntity.ok(ApiResponse.ok(statsService.overview()));
+    }
+
+    @GetMapping("/admin/stats/summary")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> summary() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.summary()));
     }
 
-    @GetMapping("/overview")
+    @GetMapping("/admin/stats/overview")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Map<String, Object>>> overview() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.overview()));
     }
 
-    @GetMapping("/industry")
+    @GetMapping("/admin/stats/industry")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> industry() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.industryStats()));
     }
 
-    @GetMapping("/applications")
+    @GetMapping("/admin/stats/applications")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> applications() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.applicationStats()));
     }
 
-    @GetMapping("/job-types")
+    @GetMapping("/admin/stats/job-types")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> jobTypes() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.jobTypeStats()));
     }
 
-    @GetMapping("/trend")
+    @GetMapping("/admin/stats/trend")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> trend() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.trendStats()));
     }
 
-    @GetMapping("/top-jobs")
+    @GetMapping("/admin/stats/top-jobs")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> topJobs() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.topJobs()));
     }

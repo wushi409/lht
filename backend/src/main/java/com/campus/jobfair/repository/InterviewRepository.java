@@ -14,9 +14,9 @@ public interface InterviewRepository extends JpaRepository<Interview, Long> {
     List<Interview> findByStudent(Student student);
     List<Interview> findByStudentAndStatus(Student student, InterviewStatus status);
 
-    @Query("select i from Interview i where i.job.company.creditCode = :creditCode")
+    @Query("SELECT i FROM Interview i LEFT JOIN FETCH i.job j LEFT JOIN FETCH j.company LEFT JOIN FETCH i.student WHERE j.company.creditCode = :creditCode")
     List<Interview> findByJobCompanyCreditCode(@Param("creditCode") String creditCode);
 
-    @Query("select i from Interview i where i.student.id = :studentId")
+    @Query("SELECT i FROM Interview i LEFT JOIN FETCH i.job j LEFT JOIN FETCH j.company LEFT JOIN FETCH i.student WHERE i.student.id = :studentId")
     List<Interview> findByStudentId(@Param("studentId") Long studentId);
 }

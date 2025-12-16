@@ -1,35 +1,33 @@
 <template>
-  <div class="interviews-container p-6">
+  <div class="page-container">
     <el-card>
-      <template #header>
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-bold">我的面试</h2>
-        </div>
-      </template>
-
-      <el-table :data="interviews" style="width: 100%" v-loading="loading">
-        <el-table-column prop="jobTitle" label="职位" />
-        <el-table-column prop="companyName" label="公司" />
-        <el-table-column prop="startTime" label="时间">
-           <template #default="scope">
-             {{ new Date(scope.row.startTime).toLocaleString() }} - {{ new Date(scope.row.endTime).toLocaleTimeString() }}
-           </template>
+      <template #header>我的面试</template>
+      
+      <el-table :data="interviews" v-loading="loading" stripe>
+        <el-table-column label="职位" prop="job.title" min-width="140" />
+        <el-table-column label="公司" prop="company.name" min-width="120" />
+        <el-table-column label="面试时间" min-width="150">
+          <template #default="{ row }">{{ formatDateTime(row.scheduledAt) }}</template>
         </el-table-column>
-        <el-table-column prop="location" label="地点/方式" />
-        <el-table-column prop="status" label="状态">
-          <template #default="scope">
-            <el-tag :type="getStatusType(scope.row.status)">{{ getStatusText(scope.row.status) }}</el-tag>
+        <el-table-column label="地点/方式" prop="location" min-width="120" />
+        <el-table-column label="状态" width="100">
+          <template #default="{ row }">
+            <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
-          <template #default="scope">
-            <div v-if="scope.row.status === 'SCHEDULED'">
-               <el-button size="small" type="success" @click="respond(scope.row.id, 'ACCEPTED')">接受</el-button>
-               <el-button size="small" type="danger" @click="respond(scope.row.id, 'DECLINED')">拒绝</el-button>
-            </div>
+        <el-table-column label="操作" width="100" fixed="right">
+          <template #default="{ row }">
+            <template v-if="row.status === 'PENDING'">
+              <span class="action-link success" @click="handleRespond(row, 'CONFIRMED')">确认</span>
+              <el-divider direction="vertical" />
+              <span class="action-link danger" @click="handleRespond(row, 'REJECTED')">拒绝</span>
+            </template>
+            <span v-else style="color:#9ca3af">-</span>
           </template>
         </el-table-column>
       </el-table>
+      
+      <el-empty v-if="!loading && interviews.length === 0" description="暂无面试安排" />
     </el-card>
   </div>
 </template>
@@ -45,48 +43,43 @@ const loading = ref(false)
 const fetchInterviews = async () => {
   loading.value = true
   try {
-    const data = await listStudentInterviews()
-    interviews.value = data || []
-  } catch (error) {
-    console.error(error)
+    interviews.value = await listStudentInterviews() || []
+  } catch (e) {
+    console.error(e)
   } finally {
     loading.value = false
   }
 }
 
-const respond = async (id, status) => {
+const handleRespond = async (row, status) => {
   try {
-    await respondToInterview(id, status)
-    ElMessage.success('操作成功')
+    await respondToInterview(row.id, status)
+    ElMessage.success(status === 'CONFIRMED' ? '已确认' : '已拒绝')
     fetchInterviews()
-  } catch (error) {
-    console.error(error)
+  } catch (e) {
+    console.error(e)
   }
 }
 
-const getStatusType = (status) => {
-  const map = {
-    'SCHEDULED': 'warning',
-    'ACCEPTED': 'success',
-    'DECLINED': 'danger',
-    'COMPLETED': 'info',
-    'CANCELLED': 'info'
-  }
-  return map[status] || 'info'
+const formatDateTime = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  return `${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
 }
 
-const getStatusText = (status) => {
-  const map = {
-    'SCHEDULED': '待确认',
-    'ACCEPTED': '已接受',
-    'DECLINED': '已拒绝',
-    'COMPLETED': '已结束',
-    'CANCELLED': '已取消'
-  }
+const statusText = (status) => {
+  const map = { PENDING: '待确认', CONFIRMED: '已确认', COMPLETED: '已完成', REJECTED: '已拒绝', CANCELLED: '已取消' }
   return map[status] || status
 }
 
-onMounted(() => {
-  fetchInterviews()
-})
+const statusType = (status) => {
+  const map = { PENDING: 'warning', CONFIRMED: 'success', COMPLETED: '', REJECTED: 'danger', CANCELLED: 'info' }
+  return map[status] || ''
+}
+
+onMounted(fetchInterviews)
 </script>
+
+<style scoped>
+.page-container { max-width: 1000px; }
+</style>

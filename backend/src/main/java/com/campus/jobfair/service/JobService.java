@@ -81,4 +81,10 @@ public class JobService {
         job.setStatus(status);
         return jobRepository.save(job);
     }
+
+    public List<Job> listByCompany(String companyUsername) {
+        Company company = companyRepository.findByCreditCode(companyUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "企业不存在"));
+        return jobRepository.findByCompany(company);
+    }
 }

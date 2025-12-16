@@ -191,7 +191,7 @@ CREATE TABLE IF NOT EXISTS favorite_jobs (
   CONSTRAINT fk_fav_job_job FOREIGN KEY (job_id) REFERENCES jobs(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Notifications, interviews, reviews
+-- Notifications and interviews
 CREATE TABLE IF NOT EXISTS notifications (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
@@ -215,27 +215,12 @@ CREATE TABLE IF NOT EXISTS interviews (
   scheduled_at DATETIME(6),
   location VARCHAR(200),
   interviewer VARCHAR(100),
-  status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+  status VARCHAR(30) NOT NULL DEFAULT 'PENDING',
   feedback VARCHAR(500),
   KEY idx_interview_job (job_id),
   KEY idx_interview_student (student_id),
   CONSTRAINT fk_interview_job FOREIGN KEY (job_id) REFERENCES jobs(id),
   CONSTRAINT fk_interview_student FOREIGN KEY (student_id) REFERENCES students(id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-CREATE TABLE IF NOT EXISTS reviews (
-  id BIGINT AUTO_INCREMENT PRIMARY KEY,
-  created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
-  updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-  company_id BIGINT,
-  student_id BIGINT,
-  rating INT,
-  comment VARCHAR(500),
-  status VARCHAR(20) NOT NULL DEFAULT 'VISIBLE',
-  KEY idx_review_company (company_id),
-  KEY idx_review_student (student_id),
-  CONSTRAINT fk_review_company FOREIGN KEY (company_id) REFERENCES companies(id),
-  CONSTRAINT fk_review_student FOREIGN KEY (student_id) REFERENCES students(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Announcements and registrations
@@ -379,9 +364,6 @@ INSERT INTO event_registrations (event_id, student_id, status, seat_no) VALUES
 
 INSERT INTO booths (job_fair_id, company_id, booth_no, location, checked_in) VALUES
 ((SELECT id FROM job_fairs WHERE name='2025春季校园双选会'), (SELECT id FROM companies WHERE credit_code='CRED-010'),'A12','一区',0);
-
-INSERT INTO reviews (company_id, student_id, rating, comment, status) VALUES
-((SELECT id FROM companies WHERE credit_code='CRED-010'), (SELECT id FROM students WHERE student_no='20259999'), 5,'公司氛围较好，期待加入','VISIBLE');
 
 INSERT INTO announcements (title, content, target, publish_at, pinned) VALUES
 ('欢迎使用校园招聘平台','这是 SQL 脚本插入的示例公告。','ALL',NOW(6),0);

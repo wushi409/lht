@@ -11,7 +11,7 @@ import com.campus.jobfair.entity.Company;
 public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByStatus(JobStatus status);
 
-    @Query("select j from Job j where (:industry is null or j.company.industry = :industry) " +
+    @Query("SELECT j FROM Job j LEFT JOIN FETCH j.company WHERE (:industry is null or j.company.industry = :industry) " +
             "and (:jobType is null or j.jobType = :jobType) " +
             "and (:location is null or j.location = :location) " +
             "and (:status is null or j.status = :status)")
@@ -20,10 +20,11 @@ public interface JobRepository extends JpaRepository<Job, Long> {
                      @Param("location") String location,
                      @Param("status") JobStatus status);
 
-    @Query("select j from Job j where lower(j.title) like lower(concat('%', :keyword, '%')) " +
+    @Query("SELECT j FROM Job j LEFT JOIN FETCH j.company WHERE lower(j.title) like lower(concat('%', :keyword, '%')) " +
             "or lower(j.company.name) like lower(concat('%', :keyword, '%'))")
     List<Job> searchByKeyword(@Param("keyword") String keyword);
 
     // 企业维度查询
-    List<Job> findByCompany(Company company);
+    @Query("SELECT j FROM Job j LEFT JOIN FETCH j.company WHERE j.company = :company")
+    List<Job> findByCompany(@Param("company") Company company);
 }

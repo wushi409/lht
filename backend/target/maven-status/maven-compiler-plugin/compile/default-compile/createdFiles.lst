@@ -17,14 +17,12 @@ com\campus\jobfair\dto\CompanyUpdateRequest.class
 com\campus\jobfair\repository\AuditLogRepository.class
 com\campus\jobfair\entity\enums\ApplicationStatus.class
 com\campus\jobfair\security\CustomUserDetailsService.class
-com\campus\jobfair\controller\CompanyJobController.class
 com\campus\jobfair\controller\AuthController.class
 com\campus\jobfair\entity\ApplicationRecord.class
 com\campus\jobfair\dto\ApiResponse.class
 com\campus\jobfair\repository\FavoriteJobRepository.class
 com\campus\jobfair\repository\ExportTaskRepository.class
 com\campus\jobfair\repository\ResumeFileRepository.class
-com\campus\jobfair\config\JacksonConfig.class
 com\campus\jobfair\entity\enums\ExportType.class
 com\campus\jobfair\entity\FavoriteJob.class
 com\campus\jobfair\entity\EventRegistration.class
@@ -51,7 +49,6 @@ com\campus\jobfair\controller\AnnouncementController.class
 com\campus\jobfair\entity\UserAccount.class
 com\campus\jobfair\service\AnnouncementService.class
 com\campus\jobfair\service\StatsService.class
-com\campus\jobfair\controller\CompanyApplicationController.class
 com\campus\jobfair\entity\Student.class
 com\campus\jobfair\entity\JobFairEvent.class
 com\campus\jobfair\config\CorsConfig.class

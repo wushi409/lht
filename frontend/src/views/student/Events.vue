@@ -1,65 +1,151 @@
 <template>
-  <div class="student-events p-6">
+  <div class="page-container">
     <el-card>
-      <template #header>
-        <h2 class="text-xl font-bold">招聘会活动</h2>
-      </template>
+      <template #header>双选会活动</template>
       
-      <div class="grid gap-6 grid-cols-1 md:grid-cols-2">
-         <el-card v-for="fair in jobFairs" :key="fair.id" shadow="hover">
-            <template #header>
-               <h3 class="font-bold text-lg">{{ fair.name }}</h3>
-            </template>
-            <p class="text-gray-600 mb-2">时间：{{ new Date(fair.startTime).toLocaleString() }} - {{ new Date(fair.endTime).toLocaleString() }}</p>
-            <p class="text-gray-600 mb-4">地点：{{ fair.location }}</p>
-            <p class="mb-4">{{ fair.description }}</p>
-            <el-button type="primary" @click="viewEvents(fair.id)">查看详情</el-button>
-         </el-card>
-      </div>
+      <el-tabs v-model="activeTab">
+        <el-tab-pane label="活动列表" name="list">
+          <el-table :data="events" v-loading="loading" stripe>
+            <el-table-column label="活动名称" prop="name" min-width="180" />
+            <el-table-column label="时间" min-width="180">
+              <template #default="{ row }">
+                {{ formatDateTime(row.startTime) }} - {{ formatTime(row.endTime) }}
+              </template>
+            </el-table-column>
+            <el-table-column label="地点" prop="location" min-width="120" />
+            <el-table-column label="操作" width="100" fixed="right">
+              <template #default="{ row }">
+                <el-button 
+                  v-if="!isRegistered(row.id)" 
+                  type="primary" 
+                  size="small" 
+                  @click="handleRegister(row)"
+                >报名</el-button>
+                <el-tag v-else type="success" size="small">已报名</el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!loading && events.length === 0" description="暂无活动" />
+        </el-tab-pane>
+        
+        <el-tab-pane label="我的报名" name="my">
+          <el-table :data="myRegistrations" v-loading="loadingMy" stripe>
+            <el-table-column label="活动名称" prop="event.name" min-width="180" />
+            <el-table-column label="报名时间" min-width="150">
+              <template #default="{ row }">{{ formatDateTime(row.createdAt || row.registeredAt) }}</template>
+            </el-table-column>
+            <el-table-column label="签到状态" width="100">
+              <template #default="{ row }">
+                <el-tag :type="row.status === 'CHECKED_IN' ? 'success' : 'info'">{{ row.status === 'CHECKED_IN' ? '已签到' : '未签到' }}</el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="150" fixed="right">
+              <template #default="{ row }">
+                <el-button v-if="row.status === 'REGISTERED'" type="primary" size="small" @click="handleCheckin(row)">签到</el-button>
+                <el-button v-if="row.status === 'REGISTERED'" type="danger" size="small" text @click="handleCancel(row)">取消</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+          <el-empty v-if="!loadingMy && myRegistrations.length === 0" description="暂无报名记录" />
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
-
-    <el-dialog v-model="dialogVisible" title="活动详情" width="60%">
-      <el-table :data="events">
-        <el-table-column prop="title" label="活动主题" />
-        <el-table-column prop="startTime" label="时间">
-           <template #default="scope">
-             {{ new Date(scope.row.startTime).toLocaleString() }}
-           </template>
-        </el-table-column>
-        <el-table-column prop="location" label="地点" />
-      </el-table>
-    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import request from '@/api/request'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
-const jobFairs = ref([])
+const activeTab = ref('list')
 const events = ref([])
-const dialogVisible = ref(false)
+const myRegistrations = ref([])
+const loading = ref(false)
+const loadingMy = ref(false)
 
-const fetchJobFairs = async () => {
+const fetchEvents = async () => {
+  loading.value = true
   try {
-    const data = await request.get('/job-fairs')
-    jobFairs.value = data || []
-  } catch (error) {
-    console.error(error)
+    events.value = await request.get('/events') || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
   }
 }
 
-const viewEvents = async (fairId) => {
+const fetchMyRegistrations = async () => {
+  loadingMy.value = true
   try {
-    const data = await request.get(`/job-fairs/${fairId}/events`)
-    events.value = data || []
-    dialogVisible.value = true
-  } catch (error) {
-    console.error(error)
+    myRegistrations.value = await request.get('/students/me/registrations') || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loadingMy.value = false
   }
 }
+
+const handleRegister = async (event) => {
+  try {
+    await ElMessageBox.confirm(`确定报名「${event.name}」吗？`, '提示')
+    await request.post('/students/me/registrations', { eventId: event.id })
+    ElMessage.success('报名成功')
+    fetchMyRegistrations()
+  } catch (e) {
+    if (e !== 'cancel') console.error(e)
+  }
+}
+
+const handleCancel = async (row) => {
+  try {
+    await ElMessageBox.confirm('确定取消报名吗？', '提示', { type: 'warning' })
+    await request.delete(`/students/me/registrations/${row.id}`)
+    ElMessage.success('取消成功')
+    fetchMyRegistrations()
+  } catch (e) {
+    if (e !== 'cancel') console.error(e)
+  }
+}
+
+const handleCheckin = async (row) => {
+  try {
+    await request.post(`/students/me/registrations/${row.id}/checkin`)
+    ElMessage.success('签到成功')
+    row.status = 'CHECKED_IN'
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const formatDateTime = (date) => {
+  if (!date) return ''
+  const d = new Date(date)
+  return `${d.toLocaleDateString('zh-CN')} ${d.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}`
+}
+
+const formatTime = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })
+}
+
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('zh-CN') : ''
+
+// 检查是否已报名某活动
+const isRegistered = (eventId) => {
+  return myRegistrations.value.some(r => r.event?.id === eventId || r.eventId === eventId)
+}
+
+watch(activeTab, (val) => {
+  if (val === 'my') fetchMyRegistrations()
+})
 
 onMounted(() => {
-  fetchJobFairs()
+  fetchEvents()
+  fetchMyRegistrations()
 })
 </script>
+
+<style scoped>
+.page-container { max-width: 1000px; }
+</style>

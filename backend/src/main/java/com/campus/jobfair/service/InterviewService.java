@@ -128,4 +128,18 @@ public class InterviewService {
                 "面试更新", "您的面试安排已更新", NotificationType.INTERVIEW_INVITE);
         return saved;
     }
+
+    @Transactional
+    public Interview cancelByCompany(Long interviewId, String companyUsername) {
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "面试不存在"));
+        if (!interview.getJob().getCompany().getCreditCode().equals(companyUsername)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权操作该面试");
+        }
+        interview.setStatus(InterviewStatus.CANCELLED);
+        Interview saved = interviewRepository.save(interview);
+        notificationService.send(UserRole.STUDENT, interview.getStudent().getId(),
+                "面试取消", "您的面试已被企业取消", NotificationType.INTERVIEW_INVITE);
+        return saved;
+    }
 }

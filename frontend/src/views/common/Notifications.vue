@@ -1,30 +1,23 @@
 <template>
-  <div class="notifications-container p-6">
+  <div class="page-container">
     <el-card>
       <template #header>
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-bold">我的通知</h2>
-          <el-button @click="markAllAsRead">全部已读</el-button>
+        <div class="card-header">
+          <span>消息通知</span>
+          <el-checkbox v-model="unreadOnly" @change="fetchNotifications">只看未读</el-checkbox>
         </div>
       </template>
-
-      <el-timeline>
-        <el-timeline-item
-          v-for="note in notifications"
-          :key="note.id"
-          :timestamp="new Date(note.createdAt).toLocaleString()"
-          placement="top"
-          :type="note.read ? 'info' : 'primary'"
-        >
-          <el-card shadow="hover">
-            <h4 class="font-bold mb-2">{{ note.title }}</h4>
-            <p>{{ note.content }}</p>
-            <el-button v-if="!note.read" type="text" @click="markRead(note.id)">标为已读</el-button>
-          </el-card>
-        </el-timeline-item>
-      </el-timeline>
       
-      <el-empty v-if="notifications.length === 0" description="暂无通知" />
+      <div v-loading="loading">
+        <div v-for="item in notifications" :key="item.id" class="notification-item" :class="{ unread: !item.read }" @click="markRead(item)">
+          <div class="content">
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.content }}</p>
+          </div>
+          <span class="time">{{ formatDate(item.createdAt) }}</span>
+        </div>
+        <el-empty v-if="!loading && notifications.length === 0" description="暂无消息" />
+      </div>
     </el-card>
   </div>
 </template>
@@ -32,44 +25,54 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import request from '@/api/request'
-import { ElMessage } from 'element-plus'
 
 const notifications = ref([])
+const loading = ref(false)
+const unreadOnly = ref(false)
 
 const fetchNotifications = async () => {
+  loading.value = true
   try {
-    const data = await request.get('/notifications')
-    notifications.value = data || []
-  } catch (error) {
-    console.error(error)
+    notifications.value = await request.get('/notifications', { params: { unread: unreadOnly.value } }) || []
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
   }
 }
 
-const markRead = async (id) => {
+const markRead = async (item) => {
+  if (item.read) return
   try {
-    await request.put(`/notifications/${id}/read`)
-    // Update local state
-    const note = notifications.value.find(n => n.id === id)
-    if (note) note.read = true
-  } catch (error) {
-    console.error(error)
+    await request.post(`/notifications/${item.id}/read`)
+    item.read = true
+  } catch (e) {
+    console.error(e)
   }
 }
 
-const markAllAsRead = async () => {
-  try {
-     // Assuming there is an endpoint or loop
-     // If API supports bulk read, use it. Otherwise loop (bad).
-     // NotificationController usually has "mark all read"?
-     // I'll skip implementation details for now as I can't confirm bulk API.
-     // Let's just refresh.
-     fetchNotifications()
-  } catch (error) {
-    console.error(error)
-  }
-}
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('zh-CN') : ''
 
-onMounted(() => {
-  fetchNotifications()
-})
+onMounted(fetchNotifications)
 </script>
+
+<style scoped>
+.page-container { max-width: 800px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+.notification-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.notification-item:hover { background: #f8fafc; }
+.notification-item:last-child { border-bottom: none; }
+.notification-item.unread { background: #eff6ff; }
+.notification-item.unread:hover { background: #dbeafe; }
+.content h4 { margin: 0 0 6px; font-size: 14px; color: #1f2937; }
+.content p { margin: 0; font-size: 13px; color: #6b7280; }
+.time { font-size: 12px; color: #9ca3af; white-space: nowrap; }
+</style>

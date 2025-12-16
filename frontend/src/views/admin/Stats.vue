@@ -1,128 +1,138 @@
 <template>
-  <div class="admin-stats p-6">
-    <h1 class="text-2xl font-bold mb-6">数据统计</h1>
-    
-    <!-- Summary Cards -->
-    <el-row :gutter="20" class="mb-6">
-      <el-col :span="6" v-for="(value, key) in summary" :key="key">
-        <el-card shadow="hover">
-          <template #header>{{ formatKey(key) }}</template>
-          <div class="text-3xl font-bold text-blue-600">{{ value }}</div>
+  <div class="page-container">
+    <el-row :gutter="16" class="stat-cards">
+      <el-col :xs="12" :sm="6">
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value">{{ stats.studentCount || 0 }}</div>
+          <div class="stat-label">学生数</div>
+        </el-card>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value">{{ stats.companyCount || 0 }}</div>
+          <div class="stat-label">企业数</div>
+        </el-card>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value">{{ stats.jobCount || 0 }}</div>
+          <div class="stat-label">职位数</div>
+        </el-card>
+      </el-col>
+      <el-col :xs="12" :sm="6">
+        <el-card shadow="hover" class="stat-card">
+          <div class="stat-value">{{ stats.applicationCount || 0 }}</div>
+          <div class="stat-label">投递数</div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- Charts -->
-    <el-row :gutter="20">
-      <el-col :span="12" class="mb-6">
-        <el-card header="行业分布">
-          <div ref="industryChart" style="height: 300px;"></div>
+    <el-row :gutter="16">
+      <el-col :span="12">
+        <el-card>
+          <template #header>行业分布</template>
+          <div ref="industryChart" style="height: 300px"></div>
         </el-card>
       </el-col>
-      <el-col :span="12" class="mb-6">
-        <el-card header="职位类型">
-          <div ref="jobTypeChart" style="height: 300px;"></div>
+      <el-col :span="12">
+        <el-card>
+          <template #header>职位类型</template>
+          <div ref="jobTypeChart" style="height: 300px"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <el-row :gutter="20">
-      <el-col :span="24">
-        <el-card header="招聘趋势">
-          <div ref="trendChart" style="height: 350px;"></div>
-        </el-card>
-      </el-col>
-    </el-row>
+    <el-card style="margin-top: 16px">
+      <template #header>热门职位 TOP 10</template>
+      <el-table :data="topJobs" stripe>
+        <el-table-column label="排名" type="index" width="60" />
+        <el-table-column label="职位" prop="title" />
+        <el-table-column label="公司" prop="companyName" />
+        <el-table-column label="投递数" prop="applicationCount" width="100" />
+      </el-table>
+    </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, nextTick } from 'vue'
-import request from '@/api/request'
 import * as echarts from 'echarts'
+import { adminApi } from '@/api/admin'
+import request from '@/api/request'
 
-const summary = ref({})
+const stats = ref({})
+const topJobs = ref([])
 const industryChart = ref(null)
 const jobTypeChart = ref(null)
-const trendChart = ref(null)
+
+let industryChartInstance = null
+let jobTypeChartInstance = null
 
 const fetchStats = async () => {
   try {
-    // Fetch summary
-    const summaryData = await request.get('/admin/stats/summary')
-    summary.value = summaryData || {}
-
-    // Fetch Industry
-    const industryData = await request.get('/admin/stats/industry')
-    initPieChart(industryChart.value, industryData, '行业分布')
-
-    // Fetch Job Types
-    const jobTypeData = await request.get('/admin/stats/job-types')
-    initPieChart(jobTypeChart.value, jobTypeData, '职位类型')
-
-    // Fetch Trend
-    const trendData = await request.get('/admin/stats/trend')
-    initLineChart(trendChart.value, trendData, '招聘趋势')
-
-  } catch (error) {
-    console.error(error)
+    stats.value = await adminApi.getStatsOverview() || {}
+  } catch (e) {
+    console.error(e)
   }
 }
 
-const initPieChart = (dom, data, name) => {
-  if (!dom) return
-  const chart = echarts.init(dom)
-  chart.setOption({
-    tooltip: { trigger: 'item' },
-    legend: { bottom: '5%', left: 'center' },
-    series: [
-      {
-        name: name,
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-        label: { show: false, position: 'center' },
-        emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
-        data: data.map(item => ({ value: item.count, name: item.name || item.industry || item.jobType }))
-      }
-    ]
-  })
-}
-
-const initLineChart = (dom, data, name) => {
-  if (!dom) return
-  const chart = echarts.init(dom)
-  chart.setOption({
-    tooltip: { trigger: 'axis' },
-    xAxis: { type: 'category', data: data.map(item => item.date) },
-    yAxis: { type: 'value' },
-    series: [
-      {
-        name: name,
-        data: data.map(item => item.count),
-        type: 'line',
-        smooth: true,
-        areaStyle: {}
-      }
-    ]
-  })
-}
-
-const formatKey = (key) => {
-  const map = {
-    totalStudents: '学生总数',
-    totalCompanies: '企业总数',
-    totalJobs: '职位总数',
-    totalApplications: '投递总数',
-    totalInterviews: '面试总数'
+const fetchIndustryStats = async () => {
+  try {
+    const data = await request.get('/admin/stats/industry') || []
+    await nextTick()
+    if (industryChart.value) {
+      industryChartInstance = echarts.init(industryChart.value)
+      industryChartInstance.setOption({
+        tooltip: { trigger: 'item' },
+        series: [{
+          type: 'pie',
+          radius: '60%',
+          data: data.map(d => ({ name: d.industry || '其他', value: d.count }))
+        }]
+      })
+    }
+  } catch (e) {
+    console.error(e)
   }
-  return map[key] || key
+}
+
+const fetchJobTypeStats = async () => {
+  try {
+    const data = await request.get('/admin/stats/job-types') || []
+    await nextTick()
+    if (jobTypeChart.value) {
+      jobTypeChartInstance = echarts.init(jobTypeChart.value)
+      jobTypeChartInstance.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: data.map(d => d.jobType || '其他') },
+        yAxis: { type: 'value' },
+        series: [{ type: 'bar', data: data.map(d => d.count) }]
+      })
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const fetchTopJobs = async () => {
+  try {
+    topJobs.value = await request.get('/admin/stats/top-jobs') || []
+  } catch (e) {
+    console.error(e)
+  }
 }
 
 onMounted(() => {
-  nextTick(() => {
-    fetchStats()
-  })
+  fetchStats()
+  fetchIndustryStats()
+  fetchJobTypeStats()
+  fetchTopJobs()
 })
 </script>
+
+<style scoped>
+.stat-cards { margin-bottom: 16px; }
+.stat-card { text-align: center; padding: 20px 0; }
+.stat-value { font-size: 32px; font-weight: 700; color: #3b82f6; }
+.stat-label { font-size: 14px; color: #6b7280; margin-top: 8px; }
+</style>

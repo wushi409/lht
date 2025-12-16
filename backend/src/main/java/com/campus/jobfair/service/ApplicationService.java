@@ -118,4 +118,9 @@ public class ApplicationService {
                 "投递状态更新", "您的投递状态变更为" + req.getStatus().name(), NotificationType.APPLICATION_STATUS);
         return saved;
     }
+
+    @Transactional(readOnly = true)
+    public List<ApplicationRecord> listByCompany(String companyUsername) {
+        return applicationRecordRepository.findByCompanyUsername(companyUsername);
+    }
 }

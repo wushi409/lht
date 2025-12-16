@@ -14,8 +14,6 @@ D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\Student.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\UserAccount.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\enums\UserRole.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\ResumeRepository.java
-D:\毕设\lht\backend\src\main\java\com\campus\jobfair\config\JacksonConfig.java
-D:\毕设\lht\backend\src\main\java\com\campus\jobfair\controller\CompanyApplicationController.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\BoothRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\ExportTaskRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\BaseEntity.java
@@ -74,7 +72,6 @@ D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\StudentRepositor
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\controller\NotificationController.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\InterviewCreateRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\entity\enums\ReviewStatus.java
-D:\毕设\lht\backend\src\main\java\com\campus\jobfair\controller\CompanyJobController.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\ApiResponse.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\dto\CompanyUpdateRequest.java
 D:\毕设\lht\backend\src\main\java\com\campus\jobfair\repository\InterviewRepository.java

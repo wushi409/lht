@@ -4,5 +4,6 @@ public enum InterviewStatus {
     PENDING,
     CONFIRMED,
     REJECTED,
+    CANCELLED,
     COMPLETED
 }

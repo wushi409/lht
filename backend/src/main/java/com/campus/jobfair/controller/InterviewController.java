@@ -53,6 +53,13 @@ public class InterviewController {
     }
 
     @PreAuthorize("hasRole('COMPANY')")
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<Interview>> cancel(@AuthenticationPrincipal CustomUserDetails user,
+                                                         @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(interviewService.cancelByCompany(id, user.getUsername())));
+    }
+
+    @PreAuthorize("hasRole('COMPANY')")
     @GetMapping("/company/me")
     public ResponseEntity<ApiResponse<List<Interview>>> listCompany(@AuthenticationPrincipal CustomUserDetails user) {
         return ResponseEntity.ok(ApiResponse.ok(interviewService.listForCompany(user.getUsername())));

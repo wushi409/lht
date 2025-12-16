@@ -1,194 +1,153 @@
 <template>
-  <div class="resumes-container p-6">
+  <div class="page-container">
     <el-card>
       <template #header>
-        <div class="flex justify-between items-center">
-          <h2 class="text-xl font-bold">我的简历</h2>
-          <el-button type="primary" @click="showCreateDialog">创建简历</el-button>
+        <div class="card-header">
+          <span>我的简历</span>
+          <el-button type="primary" @click="openCreate">新建简历</el-button>
         </div>
       </template>
-
-      <el-table :data="resumes" style="width: 100%" v-loading="loading">
-        <el-table-column prop="title" label="简历名称" />
-        <el-table-column prop="fileUrl" label="附件">
-          <template #default="scope">
-            <a v-if="scope.row.fileUrl" :href="scope.row.fileUrl" target="_blank" class="text-blue-500 hover:underline">下载</a>
-            <span v-else>未上传</span>
+      
+      <el-table :data="resumes" v-loading="loading" stripe>
+        <el-table-column label="简历名称" prop="title" min-width="150" />
+        <el-table-column label="默认" width="80">
+          <template #default="{ row }">
+            <el-tag v-if="row.isDefault" type="success" size="small">默认</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="isDefault" label="默认">
-          <template #default="scope">
-            <el-tag v-if="scope.row.isDefault" type="success">默认</el-tag>
-          </template>
+        <el-table-column label="更新时间" min-width="120">
+          <template #default="{ row }">{{ formatDate(row.updatedAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="300">
-          <template #default="scope">
-            <el-button size="small" @click="handleEdit(scope.row)">编辑</el-button>
-            <el-button size="small" type="success" @click="handleUpload(scope.row)">上传附件</el-button>
-            <el-button size="small" type="warning" @click="handleSetDefault(scope.row.id)" v-if="!scope.row.isDefault">设为默认</el-button>
-            <el-popconfirm title="确定删除吗？" @confirm="handleDelete(scope.row.id)">
-              <template #reference>
-                <el-button size="small" type="danger">删除</el-button>
-              </template>
-            </el-popconfirm>
+        <el-table-column label="操作" width="160" fixed="right">
+          <template #default="{ row }">
+            <span class="action-link" @click="openEdit(row)">编辑</span>
+            <template v-if="!row.isDefault">
+              <el-divider direction="vertical" />
+              <span class="action-link primary" @click="handleSetDefault(row)">设为默认</span>
+            </template>
+            <el-divider direction="vertical" />
+            <span class="action-link danger" @click="handleDelete(row)">删除</span>
           </template>
         </el-table-column>
       </el-table>
+      
+      <el-empty v-if="!loading && resumes.length === 0" description="暂无简历，点击上方按钮创建" />
     </el-card>
 
-    <!-- Create/Edit Dialog -->
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑简历' : '创建简历'" width="40%">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑简历' : '新建简历'" width="600px">
       <el-form :model="form" label-width="80px">
-        <el-form-item label="简历名称">
-          <el-input v-model="form.title" placeholder="例如：Java开发工程师简历" />
+        <el-form-item label="简历名称" required>
+          <el-input v-model="form.title" placeholder="如：前端开发简历" />
         </el-form-item>
-        <el-form-item label="简介">
-          <el-input v-model="form.summary" type="textarea" :rows="3" />
+        <el-form-item label="个人简介">
+          <el-input v-model="form.summary" type="textarea" :rows="2" placeholder="简要介绍自己" />
         </el-form-item>
-        <el-form-item label="技能">
-          <el-input v-model="form.skills" type="textarea" :rows="3" placeholder="例如：Java, Vue, Spring Boot" />
+        <el-form-item label="教育经历">
+          <el-input v-model="form.education" type="textarea" :rows="3" placeholder="学校、专业、学历等" />
         </el-form-item>
-        <el-form-item label="经验">
-          <el-input v-model="form.experience" type="textarea" :rows="3" />
+        <el-form-item label="工作/实习">
+          <el-input v-model="form.experience" type="textarea" :rows="3" placeholder="工作或实习经历" />
         </el-form-item>
-        <el-form-item label="教育">
-          <el-input v-model="form.education" type="textarea" :rows="3" />
+        <el-form-item label="技能特长">
+          <el-input v-model="form.skills" type="textarea" :rows="2" placeholder="掌握的技能" />
         </el-form-item>
       </el-form>
       <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="submitForm">确定</el-button>
-        </span>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="saving" @click="handleSave">保存</el-button>
       </template>
-    </el-dialog>
-
-    <!-- Upload Dialog -->
-    <el-dialog v-model="uploadDialogVisible" title="上传附件" width="30%">
-      <el-upload
-        class="upload-demo"
-        drag
-        action="#"
-        :http-request="uploadFile"
-        :limit="1"
-        :on-exceed="handleExceed"
-      >
-        <el-icon class="el-icon--upload"><upload-filled /></el-icon>
-        <div class="el-upload__text">
-          拖拽文件到此处或 <em>点击上传</em>
-        </div>
-      </el-upload>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
-import { listResumes, createResume, updateResume, deleteResume, setDefaultResume, uploadResumeFile } from '@/api/student'
-import { ElMessage } from 'element-plus'
-import { UploadFilled } from '@element-plus/icons-vue'
+import { listResumes, createResume, updateResume, deleteResume, setDefaultResume } from '@/api/student'
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 const resumes = ref([])
 const loading = ref(false)
+const saving = ref(false)
 const dialogVisible = ref(false)
-const uploadDialogVisible = ref(false)
 const isEdit = ref(false)
-const currentId = ref(null)
-
-const form = reactive({
-  title: '',
-  summary: '',
-  skills: '',
-  experience: '',
-  education: ''
-})
+const editId = ref(null)
+const form = reactive({ title: '', summary: '', education: '', experience: '', skills: '' })
 
 const fetchResumes = async () => {
   loading.value = true
   try {
-    const data = await listResumes()
-    resumes.value = data || []
-  } catch (error) {
-    console.error(error)
+    resumes.value = await listResumes() || []
+  } catch (e) {
+    console.error(e)
   } finally {
     loading.value = false
   }
 }
 
-const showCreateDialog = () => {
+const resetForm = () => {
+  Object.assign(form, { title: '', summary: '', education: '', experience: '', skills: '' })
+}
+
+const openCreate = () => {
+  resetForm()
   isEdit.value = false
-  form.title = ''
-  form.summary = ''
-  form.skills = ''
-  form.experience = ''
-  form.education = ''
+  editId.value = null
   dialogVisible.value = true
 }
 
-const handleEdit = (row) => {
-  isEdit.value = true
-  currentId.value = row.id
+const openEdit = (row) => {
   Object.assign(form, row)
+  isEdit.value = true
+  editId.value = row.id
   dialogVisible.value = true
 }
 
-const submitForm = async () => {
+const handleSave = async () => {
+  if (!form.title) return ElMessage.warning('请输入简历名称')
+  saving.value = true
   try {
     if (isEdit.value) {
-      await updateResume(currentId.value, form)
-      ElMessage.success('更新成功')
+      await updateResume(editId.value, form)
     } else {
       await createResume(form)
-      ElMessage.success('创建成功')
     }
+    ElMessage.success('保存成功')
     dialogVisible.value = false
     fetchResumes()
-  } catch (error) {
-    console.error(error)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    saving.value = false
   }
 }
 
-const handleDelete = async (id) => {
+const handleSetDefault = async (row) => {
   try {
-    await deleteResume(id)
+    await setDefaultResume(row.id)
+    ElMessage.success('已设为默认')
+    fetchResumes()
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const handleDelete = async (row) => {
+  try {
+    await ElMessageBox.confirm('确定删除该简历吗？', '提示', { type: 'warning' })
+    await deleteResume(row.id)
     ElMessage.success('删除成功')
     fetchResumes()
-  } catch (error) {
-    console.error(error)
+  } catch (e) {
+    if (e !== 'cancel') console.error(e)
   }
 }
 
-const handleSetDefault = async (id) => {
-  try {
-    await setDefaultResume(id)
-    ElMessage.success('设置成功')
-    fetchResumes()
-  } catch (error) {
-    console.error(error)
-  }
-}
+const formatDate = (date) => date ? new Date(date).toLocaleDateString('zh-CN') : ''
 
-const handleUpload = (row) => {
-  currentId.value = row.id
-  uploadDialogVisible.value = true
-}
-
-const uploadFile = async (param) => {
-  try {
-    await uploadResumeFile(currentId.value, param.file)
-    ElMessage.success('上传成功')
-    uploadDialogVisible.value = false
-    fetchResumes()
-  } catch (error) {
-    console.error(error)
-    ElMessage.error('上传失败')
-  }
-}
-const handleExceed = () => {
-    ElMessage.warning('只能上传一个文件，请删除后重新上传')
-}
-
-onMounted(() => {
-  fetchResumes()
-})
+onMounted(fetchResumes)
 </script>
+
+<style scoped>
+.page-container { max-width: 900px; }
+.card-header { display: flex; justify-content: space-between; align-items: center; }
+</style>

@@ -143,6 +143,15 @@ body {
   font-weight: 500;
 }
 
+/* 统一下拉框最小宽度 */
+.el-select {
+  min-width: 140px;
+}
+
+.el-form-item .el-select {
+  min-width: 160px;
+}
+
 /* Utils */
 .flex-between {
   display: flex;
@@ -163,5 +172,28 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 表格操作链接样式 */
+.action-link {
+  color: var(--primary-color);
+  cursor: pointer;
+  font-size: 13px;
+  transition: opacity 0.2s;
+}
+.action-link:hover {
+  opacity: 0.7;
+}
+.action-link.primary {
+  color: var(--primary-color);
+}
+.action-link.success {
+  color: var(--success-color);
+}
+.action-link.warning {
+  color: var(--warning-color);
+}
+.action-link.danger {
+  color: var(--danger-color);
 }
 

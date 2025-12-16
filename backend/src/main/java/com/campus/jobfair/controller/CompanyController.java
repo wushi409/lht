@@ -3,10 +3,12 @@ package com.campus.jobfair.controller;
 import com.campus.jobfair.dto.ApiResponse;
 import com.campus.jobfair.dto.CompanyUpdateRequest;
 import com.campus.jobfair.dto.JobRequest;
+import com.campus.jobfair.entity.ApplicationRecord;
 import com.campus.jobfair.entity.Company;
 import com.campus.jobfair.entity.Job;
 import com.campus.jobfair.entity.enums.JobStatus;
 import com.campus.jobfair.security.CustomUserDetails;
+import com.campus.jobfair.service.ApplicationService;
 import com.campus.jobfair.service.CompanyService;
 import com.campus.jobfair.service.JobService;
 import jakarta.validation.Valid;
@@ -28,10 +30,12 @@ public class CompanyController {
 
     private final CompanyService companyService;
     private final JobService jobService;
+    private final ApplicationService applicationService;
 
-    public CompanyController(CompanyService companyService, JobService jobService) {
+    public CompanyController(CompanyService companyService, JobService jobService, ApplicationService applicationService) {
         this.companyService = companyService;
         this.jobService = jobService;
+        this.applicationService = applicationService;
     }
 
     @GetMapping("/companies")
@@ -55,6 +59,18 @@ public class CompanyController {
     public ResponseEntity<ApiResponse<Company>> updateCompany(@AuthenticationPrincipal CustomUserDetails user,
                                                               @RequestBody CompanyUpdateRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(companyService.updateProfile(user.getUsername(), request)));
+    }
+
+    @PreAuthorize("hasRole('COMPANY')")
+    @GetMapping("/companies/me/applications")
+    public ResponseEntity<ApiResponse<List<ApplicationRecord>>> myApplications(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.ok(applicationService.listByCompany(user.getUsername())));
+    }
+
+    @PreAuthorize("hasRole('COMPANY')")
+    @GetMapping("/companies/me/jobs")
+    public ResponseEntity<ApiResponse<List<Job>>> myJobs(@AuthenticationPrincipal CustomUserDetails user) {
+        return ResponseEntity.ok(ApiResponse.ok(jobService.listByCompany(user.getUsername())));
     }
 
     @PreAuthorize("hasRole('COMPANY')")

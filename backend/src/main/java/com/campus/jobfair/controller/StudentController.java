@@ -181,4 +181,10 @@ public class StudentController {
         eventService.cancelRegistration(user.getUsername(), id);
         return ResponseEntity.ok(ApiResponse.ok("取消报名成功", null));
     }
+
+    @PostMapping("/me/registrations/{id}/checkin")
+    public ResponseEntity<ApiResponse<EventRegistration>> selfCheckin(@AuthenticationPrincipal CustomUserDetails user,
+                                                                      @PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.selfCheckIn(user.getUsername(), id)));
+    }
 }

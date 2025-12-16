@@ -1,6 +1,7 @@
 package com.campus.jobfair.entity;
 
 import com.campus.jobfair.entity.enums.InterviewStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,6 +18,7 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "interviews")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Interview extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

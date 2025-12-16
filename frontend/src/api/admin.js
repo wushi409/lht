@@ -15,10 +15,8 @@ export const adminApi = {
     return request.get('/admin/stats/summary')
   },
 
-  setReviewVisibility(id, status) {
-    return request.post(`/admin/reviews/${id}/visibility`, null, {
-      params: { status }
-    })
+  getStatsOverview() {
+    return request.get('/admin/stats/overview')
   },
 
   createBooth(data) {

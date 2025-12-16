@@ -44,4 +44,10 @@ public class EventController {
     public ResponseEntity<ApiResponse<EventRegistration>> checkin(@PathVariable Long registrationId) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.checkIn(registrationId)));
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/event-registrations")
+    public ResponseEntity<ApiResponse<List<EventRegistration>>> listRegistrations(@org.springframework.web.bind.annotation.RequestParam(required = false) Long eventId) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));
+    }
 }
