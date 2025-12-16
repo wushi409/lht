@@ -1,44 +1,77 @@
 <template>
-  <div class="login-container">
-    <el-card class="login-card">
-      <template #header>
-        <div class="card-header">
-          <h2>高校毕业生双选会信息管理系统</h2>
+  <div class="login-page">
+    <div class="login-container">
+      <!-- Left Side - Image/Brand -->
+      <div class="login-banner">
+        <div class="banner-content">
+          <h1>开启职业新篇章</h1>
+          <p>连接高校人才与优质企业，搭建高效沟通桥梁。</p>
         </div>
-      </template>
-      <el-tabs v-model="activeTab">
-        <el-tab-pane label="登录" name="login">
-          <el-form :model="loginForm" :rules="rules" ref="loginFormRef" label-width="0px">
-            <el-form-item prop="username">
-              <el-input v-model="loginForm.username" placeholder="用户名/学号/手机号">
-                <template #prefix><el-icon><User /></el-icon></template>
-              </el-input>
-            </el-form-item>
-            <el-form-item prop="password">
-              <el-input v-model="loginForm.password" type="password" placeholder="密码" show-password>
-                <template #prefix><el-icon><Lock /></el-icon></template>
-              </el-input>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" style="width: 100%" @click="handleLogin" :loading="loading">登录</el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-        <el-tab-pane label="学生注册" name="register_student">
-          <!-- Student Register Form Placeholder -->
-          <div style="text-align: center; padding: 20px;">
-            请联系管理员或前往注册页面
-            <el-button type="text" @click="$router.push('/register/student')">去注册</el-button>
+        <div class="banner-bg"></div>
+      </div>
+
+      <!-- Right Side - Form -->
+      <div class="login-form-wrapper">
+        <div class="form-header">
+          <h2>欢迎回来</h2>
+          <p>请登录您的账号</p>
+        </div>
+
+        <el-tabs v-model="activeTab" class="login-tabs">
+          <el-tab-pane label="账号登录" name="password">
+            <el-form :model="loginForm" :rules="rules" ref="loginFormRef" class="login-form">
+              <el-form-item prop="username">
+                <el-input 
+                  v-model="loginForm.username" 
+                  placeholder="请输入用户名/学号" 
+                  size="large"
+                >
+                  <template #prefix>
+                    <el-icon><User /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+              
+              <el-form-item prop="password">
+                <el-input 
+                  v-model="loginForm.password" 
+                  type="password" 
+                  placeholder="请输入密码" 
+                  size="large"
+                  show-password
+                >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
+                </el-input>
+              </el-form-item>
+
+              <div class="form-options">
+                <el-checkbox v-model="rememberMe">记住我</el-checkbox>
+                <a href="#" class="forgot-password">忘记密码？</a>
+              </div>
+
+              <el-button type="primary" :loading="loading" class="submit-btn" size="large" @click="handleLogin">
+                登录
+              </el-button>
+            </el-form>
+          </el-tab-pane>
+          
+          <el-tab-pane label="手机验证码" name="sms" disabled>
+             <div class="placeholder-box">
+               <p>验证码登录功能即将上线...</p>
+             </div>
+          </el-tab-pane>
+        </el-tabs>
+
+        <div class="form-footer">
+          <p>还没有账号？ <router-link to="/register/student">立即注册</router-link></p>
+          <div class="role-switch">
+             <router-link to="/register/company" class="company-link">我是企业用户</router-link>
           </div>
-        </el-tab-pane>
-        <el-tab-pane label="企业入驻" name="register_company">
-           <!-- Company Register Form Placeholder -->
-           <div style="text-align: center; padding: 20px;">
-            <el-button type="text" @click="$router.push('/register/company')">企业入驻申请</el-button>
-          </div>
-        </el-tab-pane>
-      </el-tabs>
-    </el-card>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -53,7 +86,8 @@ const router = useRouter()
 const userStore = useUserStore()
 const loginFormRef = ref(null)
 const loading = ref(false)
-const activeTab = ref('login')
+const activeTab = ref('password')
+const rememberMe = ref(false)
 
 const loginForm = reactive({
   username: '',
@@ -67,15 +101,14 @@ const rules = {
 
 const handleLogin = async () => {
   if (!loginFormRef.value) return
+  
   await loginFormRef.value.validate(async (valid) => {
     if (valid) {
       loading.value = true
       try {
-        const result = await userStore.loginAction(loginForm)
-        console.log('登录返回数据:', result)
-        console.log('Token:', userStore.token)
-        console.log('Role:', userStore.role)
+        await userStore.login(loginForm)
         ElMessage.success('登录成功')
+        
         // Redirect based on role
         const role = userStore.role
         if (role === 'STUDENT') {
@@ -88,7 +121,6 @@ const handleLogin = async () => {
           router.push('/')
         }
       } catch (error) {
-        console.error('登录错误:', error)
         ElMessage.error(error.message || '登录失败')
       } finally {
         loading.value = false
@@ -99,17 +131,149 @@ const handleLogin = async () => {
 </script>
 
 <style scoped>
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f3f4f6;
+  padding: 2rem;
+}
+
 .login-container {
   display: flex;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  overflow: hidden;
+  width: 1000px;
+  max-width: 100%;
+  min-height: 600px;
+}
+
+.login-banner {
+  flex: 1;
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  align-items: center;
-  height: 100vh;
-  background-color: #f0f2f5;
+  color: white;
+  position: relative;
 }
-.login-card {
-  width: 400px;
+
+.banner-content {
+  z-index: 2;
 }
-.card-header {
+
+.banner-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  font-weight: 700;
+}
+
+.banner-content p {
+  font-size: 1.1rem;
+  opacity: 0.9;
+}
+
+.login-form-wrapper {
+  flex: 1;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.form-header {
+  margin-bottom: 2rem;
   text-align: center;
+}
+
+.form-header h2 {
+  font-size: 1.75rem;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.form-header p {
+  color: #6b7280;
+}
+
+.login-tabs :deep(.el-tabs__nav-wrap::after) {
+  height: 1px;
+}
+
+.login-form {
+  margin-top: 1.5rem;
+}
+
+.submit-btn {
+  width: 100%;
+  margin-top: 1.5rem;
+  font-weight: 600;
+}
+
+.form-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.forgot-password {
+  color: #4f46e5;
+  text-decoration: none;
+  font-size: 0.875rem;
+}
+
+.form-footer {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.form-footer a {
+  color: #4f46e5;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.role-switch {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.company-link {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.company-link:hover {
+  color: #4f46e5;
+}
+
+.placeholder-box {
+  padding: 2rem;
+  text-align: center;
+  color: #9ca3af;
+}
+
+@media (max-width: 768px) {
+  .login-container {
+    flex-direction: column;
+    min-height: auto;
+  }
+  
+  .login-banner {
+    padding: 2rem;
+    display: none; /* Hide banner on mobile */
+  }
+  
+  .login-form-wrapper {
+    padding: 2rem;
+  }
 }
 </style>
