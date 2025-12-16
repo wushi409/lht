@@ -133,6 +133,7 @@ const resetFilters = () => {
   filters.keyword = ''
   filters.industry = ''
   filters.location = ''
+  filters.jobType = ''
   fetchJobs()
 }
 

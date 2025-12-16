@@ -21,6 +21,10 @@ export const companyApi = {
     return request.post(`/jobs/${id}/status`, null, { params: { status } })
   },
 
+  updateApplicationStatus(id, data) {
+    return request.post(`/applications/${id}/status`, data)
+  },
+
   getCompany(id) {
     return request.get(`/companies/${id}`)
   },
@@ -29,3 +33,5 @@ export const companyApi = {
     return request.get('/companies')
   }
 }
+
+

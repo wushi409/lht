@@ -3,18 +3,26 @@
     <h2>我的投递记录</h2>
     <el-card shadow="never">
       <el-table :data="applications" style="width: 100%" v-loading="loading">
-        <el-table-column prop="jobTitle" label="职位名称" min-width="150" />
-        <el-table-column prop="companyName" label="公司名称" min-width="150" />
-        <el-table-column prop="createTime" label="投递时间" width="180" />
-        <el-table-column prop="status" label="状态" width="100">
+        <el-table-column label="职位名称" min-width="160">
+          <template #default="scope">
+            {{ scope.row.job?.title || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="公司名称" min-width="160">
+          <template #default="scope">
+            {{ scope.row.job?.company?.name || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column prop="createdAt" label="投递时间" width="200" />
+        <el-table-column prop="status" label="状态" width="120">
           <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)">{{ getStatusLabel(scope.row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="120">
+        <el-table-column label="操作" width="140">
           <template #default="scope">
             <el-button 
-              v-if="scope.row.status === 'PENDING'" 
+              v-if="scope.row.status === 'SUBMITTED'" 
               type="danger" 
               link 
               @click="handleWithdraw(scope.row)"
