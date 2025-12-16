@@ -1,14 +1,15 @@
 <template>
-  <div class="register-container flex justify-center items-center min-h-screen bg-gray-100 py-10">
-    <el-card class="box-card w-full max-w-lg">
+  <div class="register-container">
+    <el-card class="register-card">
       <template #header>
-        <div class="card-header text-center">
-          <h2 class="text-xl font-bold">学生注册</h2>
+        <div class="register-header">
+          <h2>🎓 学生注册</h2>
+          <p>加入校园双选会，开启求职之旅</p>
         </div>
       </template>
       <el-form :model="registerForm" :rules="rules" ref="registerFormRef" label-width="100px">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="registerForm.username" placeholder="请输入用户名" />
+        <el-form-item label="学号" prop="username">
+          <el-input v-model="registerForm.username" placeholder="请输入学号" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="registerForm.password" type="password" placeholder="请输入密码" show-password />
@@ -16,23 +17,20 @@
         <el-form-item label="姓名" prop="name">
           <el-input v-model="registerForm.name" placeholder="请输入真实姓名" />
         </el-form-item>
+        <el-form-item label="学院" prop="college">
+          <el-input v-model="registerForm.college" placeholder="请输入学院" />
+        </el-form-item>
         <el-form-item label="邮箱" prop="email">
           <el-input v-model="registerForm.email" placeholder="请输入邮箱" />
         </el-form-item>
         <el-form-item label="手机号" prop="phone">
           <el-input v-model="registerForm.phone" placeholder="请输入手机号" />
         </el-form-item>
-        <el-form-item label="专业" prop="major">
-          <el-input v-model="registerForm.major" placeholder="请输入专业" />
-        </el-form-item>
-        <el-form-item label="毕业年份" prop="graduationYear">
-          <el-input-number v-model="registerForm.graduationYear" :min="2020" :max="2030" />
-        </el-form-item>
         <el-form-item>
-          <el-button type="primary" class="w-full" :loading="loading" @click="handleRegister">注册</el-button>
+          <el-button type="primary" style="width: 100%" :loading="loading" @click="handleRegister">注册</el-button>
         </el-form-item>
-        <div class="text-center text-sm">
-          <router-link to="/login" class="text-blue-500 hover:underline">已有账号？去登录</router-link>
+        <div class="login-link">
+          <router-link to="/login">已有账号？去登录</router-link>
         </div>
       </el-form>
     </el-card>
@@ -53,21 +51,15 @@ const registerForm = reactive({
   username: '',
   password: '',
   name: '',
+  college: '',
   email: '',
-  phone: '',
-  major: '',
-  graduationYear: 2024
+  phone: ''
 })
 
 const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  username: [{ required: true, message: '请输入学号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }],
-  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
-  email: [
-    { required: true, message: '请输入邮箱', trigger: 'blur' },
-    { type: 'email', message: '请输入正确的邮箱地址', trigger: ['blur', 'change'] }
-  ],
-  phone: [{ required: true, message: '请输入手机号', trigger: 'blur' }]
+  name: [{ required: true, message: '请输入姓名', trigger: 'blur' }]
 }
 
 const handleRegister = () => {
@@ -90,6 +82,47 @@ const handleRegister = () => {
 
 <style scoped>
 .register-container {
-  background-image: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.register-card {
+  width: 500px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.register-header {
+  text-align: center;
+}
+
+.register-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  color: #303133;
+}
+
+.register-header p {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+}
+
+.login-link {
+  text-align: center;
+  font-size: 14px;
+}
+
+.login-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
 }
 </style>

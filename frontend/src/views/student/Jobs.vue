@@ -1,62 +1,84 @@
 <template>
-  <div class="jobs-container p-6">
-    <div class="filter-section mb-6 bg-white p-4 rounded shadow-sm">
-      <el-form :inline="true" :model="filters" class="demo-form-inline">
-        <el-form-item label="关键词">
-          <el-input v-model="filters.keyword" placeholder="职位名称/公司" clearable />
-        </el-form-item>
-        <el-form-item label="行业">
-          <el-input v-model="filters.industry" placeholder="例如：互联网" clearable />
-        </el-form-item>
-        <el-form-item label="地点">
-          <el-input v-model="filters.location" placeholder="例如：北京" clearable />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="fetchJobs">搜索</el-button>
-        </el-form-item>
-      </el-form>
-    </div>
-
-    <div class="job-list grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-      <el-card v-for="job in jobs" :key="job.id" class="job-card hover:shadow-md transition-shadow">
-        <template #header>
-          <div class="flex justify-between items-center">
-            <h3 class="text-lg font-bold truncate">{{ job.title }}</h3>
-            <span class="text-orange-500 font-bold">{{ job.salaryRange || '面议' }}</span>
-          </div>
-        </template>
-        <div class="text-gray-600 mb-2">
-          <p><span class="font-semibold">公司：</span>{{ job.companyName }}</p>
-          <p><span class="font-semibold">地点：</span>{{ job.location }}</p>
-          <p><span class="font-semibold">学历：</span>{{ job.degreeRequirement || '不限' }}</p>
-        </div>
-        <div class="flex justify-end mt-4">
-          <el-button type="primary" size="small" @click="viewJobDetail(job)">查看详情</el-button>
-        </div>
+  <div class="jobs-page">
+    <div class="container">
+      <h2>职位大厅</h2>
+      
+      <!-- 搜索筛选 -->
+      <el-card class="filter-card" shadow="never">
+        <el-form :inline="true" :model="filters">
+          <el-form-item label="关键词">
+            <el-input v-model="filters.keyword" placeholder="职位名称/公司" clearable style="width: 200px" />
+          </el-form-item>
+          <el-form-item label="行业">
+            <el-select v-model="filters.industry" placeholder="选择行业" clearable style="width: 150px">
+              <el-option label="互联网" value="互联网" />
+              <el-option label="金融" value="金融" />
+              <el-option label="教育" value="教育" />
+              <el-option label="制造业" value="制造业" />
+            </el-select>
+          </el-form-item>
+          <el-form-item label="地点">
+            <el-input v-model="filters.location" placeholder="工作地点" clearable style="width: 150px" />
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" @click="fetchJobs">搜索</el-button>
+          </el-form-item>
+        </el-form>
       </el-card>
-    </div>
 
-    <el-empty v-if="jobs.length === 0" description="暂无相关职位" />
-
-    <!-- Job Detail Dialog -->
-    <el-dialog v-model="dialogVisible" title="职位详情" width="50%">
-      <div v-if="currentJob">
-        <h2 class="text-xl font-bold mb-2">{{ currentJob.title }}</h2>
-        <p class="text-gray-500 mb-4">{{ currentJob.companyName }} | {{ currentJob.location }} | {{ currentJob.salaryRange }}</p>
+      <!-- 职位列表 -->
+      <div class="job-list" v-loading="loading">
+        <el-row :gutter="20">
+          <el-col :xs="24" :sm="12" :lg="8" v-for="job in jobs" :key="job.id">
+            <el-card class="job-card" shadow="hover" @click="viewJobDetail(job)">
+              <div class="job-header">
+                <h3 class="job-title">{{ job.title }}</h3>
+                <span class="job-salary">{{ job.salaryRange || '面议' }}</span>
+              </div>
+              <div class="job-company">{{ job.company?.name || job.companyName || '未知企业' }}</div>
+              <div class="job-tags">
+                <el-tag size="small" type="info">{{ job.location || '不限' }}</el-tag>
+                <el-tag size="small" type="info">{{ job.jobType || '全职' }}</el-tag>
+              </div>
+              <div class="job-footer">
+                <span class="job-date">{{ formatDate(job.publishAt) }}</span>
+                <el-button type="primary" size="small" @click.stop="handleApply(job)">投递</el-button>
+              </div>
+            </el-card>
+          </el-col>
+        </el-row>
         
-        <el-divider content-position="left">职位描述</el-divider>
-        <p class="whitespace-pre-wrap mb-4">{{ currentJob.description }}</p>
-        
-        <el-divider content-position="left">任职要求</el-divider>
-        <p class="whitespace-pre-wrap mb-4">{{ currentJob.requirements }}</p>
+        <el-empty v-if="!loading && jobs.length === 0" description="暂无相关职位" />
       </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="handleApply" :loading="applying">立即投递</el-button>
-        </span>
-      </template>
-    </el-dialog>
+
+      <!-- 职位详情对话框 -->
+      <el-dialog v-model="dialogVisible" title="职位详情" width="600px">
+        <div v-if="currentJob" class="job-detail">
+          <h2>{{ currentJob.title }}</h2>
+          <div class="detail-meta">
+            <span>{{ currentJob.company?.name || currentJob.companyName }}</span>
+            <span>{{ currentJob.location }}</span>
+            <span class="salary">{{ currentJob.salaryRange || '面议' }}</span>
+          </div>
+          
+          <el-divider />
+          
+          <div class="detail-section" v-if="currentJob.description">
+            <h4>职位描述</h4>
+            <p>{{ currentJob.description }}</p>
+          </div>
+          
+          <div class="detail-section" v-if="currentJob.skills">
+            <h4>技能要求</h4>
+            <p>{{ currentJob.skills }}</p>
+          </div>
+        </div>
+        <template #footer>
+          <el-button @click="dialogVisible = false">关闭</el-button>
+          <el-button type="primary" @click="handleApply(currentJob)" :loading="applying">立即投递</el-button>
+        </template>
+      </el-dialog>
+    </div>
   </div>
 </template>
 
@@ -65,24 +87,32 @@ import { ref, reactive, onMounted } from 'vue'
 import { getJobs } from '@/api/job'
 import { applyJob } from '@/api/student'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/stores/user'
+import { useRouter } from 'vue-router'
 
+const userStore = useUserStore()
+const router = useRouter()
 const jobs = ref([])
+const loading = ref(false)
+const applying = ref(false)
+const dialogVisible = ref(false)
+const currentJob = ref(null)
+
 const filters = reactive({
   keyword: '',
   industry: '',
   location: ''
 })
 
-const dialogVisible = ref(false)
-const currentJob = ref(null)
-const applying = ref(false)
-
 const fetchJobs = async () => {
+  loading.value = true
   try {
     const data = await getJobs(filters)
     jobs.value = data || []
   } catch (error) {
     console.error(error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -91,13 +121,21 @@ const viewJobDetail = (job) => {
   dialogVisible.value = true
 }
 
-const handleApply = async () => {
-  if (!currentJob.value) return
+const handleApply = async (job) => {
+  if (!userStore.token) {
+    ElMessage.warning('请先登录')
+    router.push('/login')
+    return
+  }
+  
+  if (userStore.role !== 'STUDENT') {
+    ElMessage.warning('只有学生可以投递简历')
+    return
+  }
   
   applying.value = true
   try {
-    // Assuming applyJob takes an object with jobId
-    await applyJob({ jobId: currentJob.value.id })
+    await applyJob({ jobId: job.id })
     ElMessage.success('投递成功')
     dialogVisible.value = false
   } catch (error) {
@@ -107,13 +145,119 @@ const handleApply = async () => {
   }
 }
 
+const formatDate = (date) => {
+  if (!date) return ''
+  return new Date(date).toLocaleDateString('zh-CN')
+}
+
 onMounted(() => {
   fetchJobs()
 })
 </script>
 
 <style scoped>
+.jobs-page {
+  padding: 30px 20px;
+  min-height: calc(100vh - 64px - 200px);
+}
+
+.jobs-page h2 {
+  margin: 0 0 20px 0;
+  font-size: 28px;
+  color: var(--text-main);
+}
+
+.filter-card {
+  margin-bottom: 24px;
+}
+
 .job-card {
-  border-radius: 8px;
+  margin-bottom: 20px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.job-card:hover {
+  transform: translateY(-3px);
+}
+
+.job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.job-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.job-salary {
+  color: #f56c6c;
+  font-weight: 600;
+  font-size: 14px;
+  margin-left: 10px;
+}
+
+.job-company {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.job-tags {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.job-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.job-date {
+  color: var(--text-placeholder);
+  font-size: 12px;
+}
+
+.job-detail h2 {
+  margin: 0 0 10px 0;
+  font-size: 22px;
+}
+
+.detail-meta {
+  display: flex;
+  gap: 15px;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.detail-meta .salary {
+  color: #f56c6c;
+  font-weight: 600;
+}
+
+.detail-section {
+  margin-bottom: 20px;
+}
+
+.detail-section h4 {
+  margin: 0 0 10px 0;
+  color: var(--text-main);
+}
+
+.detail-section p {
+  color: var(--text-regular);
+  line-height: 1.8;
+  white-space: pre-wrap;
 }
 </style>

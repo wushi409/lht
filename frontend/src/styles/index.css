@@ -1,21 +1,21 @@
 :root {
   /* Brand Colors - Indigo/Blue Violet Theme */
-  --primary-color: #4f46e5; /* Indigo 600 */
-  --primary-hover: #4338ca; /* Indigo 700 */
-  --primary-light: #e0e7ff; /* Indigo 100 */
-  --secondary-color: #ec4899; /* Pink 500 */
+  --primary-color: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #e0e7ff;
+  --secondary-color: #ec4899;
   
   /* Neutral Colors */
-  --text-main: #111827; /* Gray 900 */
-  --text-regular: #374151; /* Gray 700 */
-  --text-secondary: #6b7280; /* Gray 500 */
-  --text-placeholder: #9ca3af; /* Gray 400 */
+  --text-main: #111827;
+  --text-regular: #374151;
+  --text-secondary: #6b7280;
+  --text-placeholder: #9ca3af;
   
-  --bg-body: #f3f4f6; /* Gray 100 */
+  --bg-body: #f3f4f6;
   --bg-white: #ffffff;
   --bg-card: #ffffff;
   
-  --border-color: #e5e7eb; /* Gray 200 */
+  --border-color: #e5e7eb;
   
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
@@ -28,20 +28,47 @@
   --radius-lg: 1rem;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 body {
+  margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   color: var(--text-main);
   background-color: var(--bg-body);
   -webkit-font-smoothing: antialiased;
 }
 
-/* Utilities */
+/* Container */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 1rem;
 }
 
+/* Page Container - 统一页面容器样式 */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.page-container h2 {
+  margin: 0 0 20px 0;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Card */
 .card {
   background: var(--bg-card);
   border-radius: var(--radius-md);
@@ -52,9 +79,9 @@ body {
 
 .card:hover {
   box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
 }
 
+/* Button */
 .btn-primary {
   background-color: var(--primary-color);
   color: white;
@@ -70,6 +97,43 @@ body {
   background-color: var(--primary-hover);
 }
 
+/* Element Plus 覆盖样式 */
+.el-card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+.el-button--primary {
+  --el-button-bg-color: var(--primary-color);
+  --el-button-border-color: var(--primary-color);
+  --el-button-hover-bg-color: var(--primary-hover);
+  --el-button-hover-border-color: var(--primary-hover);
+}
+
+.el-menu-item.is-active {
+  color: var(--primary-color) !important;
+}
+
+/* Table 样式优化 */
+.el-table {
+  --el-table-border-color: var(--border-color);
+}
+
+.el-table th.el-table__cell {
+  background-color: #f8fafc !important;
+  font-weight: 600;
+}
+
+/* Dialog 样式优化 */
+.el-dialog {
+  border-radius: var(--radius-lg);
+}
+
+.el-dialog__header {
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 15px;
+}
+
 /* Animations */
 .fade-enter-active,
 .fade-leave-active {
@@ -79,4 +143,15 @@ body {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .page-container {
+    padding: 15px;
+  }
+  
+  .page-container h2 {
+    font-size: 20px;
+  }
 }
