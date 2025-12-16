@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { useUserStore } from '@/stores/user'
+import { useUserStore } from '../stores/user'
 import MainLayout from '@/layout/MainLayout.vue'
 import StudentLayout from '@/layout/StudentLayout.vue'
 
