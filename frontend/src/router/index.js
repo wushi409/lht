@@ -42,10 +42,11 @@ const routes = [
         path: 'student',
         meta: { role: 'STUDENT' },
         children: [
-          {
-            path: 'dashboard',
-            redirect: '/student/profile' // Redirect dashboard to profile for students in new layout
-          },
+            {
+              path: 'dashboard',
+              name: 'StudentDashboard',
+              component: () => import('@/views/student/Dashboard.vue')
+            },
           {
             path: 'profile',
             name: 'StudentProfile',
