@@ -70,7 +70,7 @@
             <!-- Breadcrumb placeholder -->
           </div>
           <div class="user-info">
-            <span style="margin-right: 15px">欢迎, {{ userStore.userInfo?.username || userStore.role }}</span>
+            <span style="margin-right: 15px">欢迎, {{ userStore.userInfo?.username || '用户' }}（{{ role }}）</span>
             <el-button type="danger" size="small" @click="handleLogout">退出</el-button>
           </div>
         </div>

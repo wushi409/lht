@@ -34,11 +34,9 @@ export const useUserStore = defineStore('user', () => {
   async function loginAction(loginForm) {
     try {
       const data = await login(loginForm)
-      // Assuming data contains { token, role, ...userFields } or similar
-      // Adjust based on AuthResponse
       setToken(data.token)
-      setRole(data.role) // e.g., 'STUDENT', 'COMPANY', 'ADMIN'
-      setUserInfo(data)
+      setRole(data.role) // 'STUDENT' | 'COMPANY' | 'ADMIN'
+      setUserInfo({ username: loginForm.username, role: data.role })
       return data
     } catch (error) {
       throw error

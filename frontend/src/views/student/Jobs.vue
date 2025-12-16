@@ -11,6 +11,9 @@
         <el-form-item label="工作地点">
           <el-input v-model="filters.location" placeholder="城市" clearable />
         </el-form-item>
+        <el-form-item label="职位类型">
+          <el-input v-model="filters.jobType" placeholder="全职/实习等" clearable />
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetFilters">重置</el-button>
@@ -18,68 +21,66 @@
       </el-form>
     </div>
 
-    <div class="job-list" v-loading="loading">
-      <el-empty v-if="jobs.length === 0 && !loading" description="暂无相关职位" />
-      <el-row :gutter="20" v-else>
-        <el-col :span="24" v-for="job in jobs" :key="job.id" style="margin-bottom: 20px;">
-          <el-card shadow="hover">
-            <div class="job-card-content">
-              <div class="job-info">
-                <div class="job-title-row">
-                  <h3 class="job-title" @click="viewDetail(job)">{{ job.title }}</h3>
-                  <span class="salary">{{ job.salary }}</span>
+      <div class="job-list" v-loading="loading">
+        <el-empty v-if="jobs.length === 0 && !loading" description="暂无相关职位" />
+        <el-row :gutter="20" v-else>
+          <el-col :span="24" v-for="job in jobs" :key="job.id" style="margin-bottom: 20px;">
+            <el-card shadow="hover">
+              <div class="job-card-content">
+                <div class="job-info">
+                  <div class="job-title-row">
+                    <h3 class="job-title" @click="viewDetail(job)">{{ job.title }}</h3>
+                    <span class="salary">{{ job.salaryRange || '面议' }}</span>
+                  </div>
+                  <div class="company-info">
+                    <el-icon><OfficeBuilding /></el-icon> {{ job.company?.name || '-' }} 
+                    <el-divider direction="vertical" />
+                    <span>{{ job.location || '不限' }}</span>
+                    <el-divider direction="vertical" />
+                    <span>{{ job.jobType || '不限' }}</span>
+                  </div>
+                  <div class="tags" style="margin-top: 10px">
+                    <el-tag size="small" style="margin-right: 5px" v-if="job.jobType">{{ job.jobType }}</el-tag>
+                    <el-tag size="small" type="info" style="margin-right: 5px" v-if="job.company?.industry">{{ job.company.industry }}</el-tag>
+                  </div>
                 </div>
-                <div class="company-info">
-                  <el-icon><OfficeBuilding /></el-icon> {{ job.companyName }} 
-                  <el-divider direction="vertical" />
-                  <span>{{ job.location }}</span>
-                  <el-divider direction="vertical" />
-                  <span>{{ job.education }}</span>
-                  <el-divider direction="vertical" />
-                   <span>{{ job.workExperience }}</span>
-                </div>
-                <div class="tags" style="margin-top: 10px">
-                  <el-tag size="small" style="margin-right: 5px">{{ job.jobType }}</el-tag>
-                  <el-tag size="small" type="info" style="margin-right: 5px" v-if="job.industry">{{ job.industry }}</el-tag>
+                <div class="actions">
+                  <el-button type="primary" size="small" @click="apply(job)">投递简历</el-button>
+                  <el-button size="small" @click="viewDetail(job)">查看详情</el-button>
                 </div>
               </div>
-              <div class="actions">
-                <el-button type="primary" size="small" @click="apply(job)">投递简历</el-button>
-                <el-button size="small" @click="viewDetail(job)">查看详情</el-button>
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
-    </div>
-
-    <!-- Job Detail Dialog -->
-    <el-dialog v-model="detailVisible" title="职位详情" width="60%">
-      <div v-if="currentJob">
-        <h3>{{ currentJob.title }}</h3>
-        <p class="salary">{{ currentJob.salary }}</p>
-        <div class="meta-info">
-          <span><el-icon><Location /></el-icon> {{ currentJob.location }}</span>
-          <span style="margin-left: 20px"><el-icon><School /></el-icon> {{ currentJob.education }}</span>
-          <span style="margin-left: 20px"><el-icon><Timer /></el-icon> {{ currentJob.workExperience }}</span>
-        </div>
-        <el-divider />
-        <h4>职位描述</h4>
-        <div style="white-space: pre-wrap;">{{ currentJob.description }}</div>
-        <el-divider />
-        <h4>技能要求</h4>
-        <div style="white-space: pre-wrap;">{{ currentJob.requirement }}</div>
-        <el-divider />
-        <h4>公司信息</h4>
-        <p>{{ currentJob.companyName }}</p>
+            </el-card>
+          </el-col>
+        </el-row>
       </div>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="detailVisible = false">关闭</el-button>
-          <el-button type="primary" @click="apply(currentJob)">立即投递</el-button>
-        </span>
-      </template>
-    </el-dialog>
+
+      <!-- Job Detail Dialog -->
+      <el-dialog v-model="detailVisible" title="职位详情" width="60%">
+        <div v-if="currentJob">
+          <h3>{{ currentJob.title }}</h3>
+          <p class="salary">{{ currentJob.salaryRange || '面议' }}</p>
+          <div class="meta-info">
+            <span><el-icon><Location /></el-icon> {{ currentJob.location || '不限' }}</span>
+            <span style="margin-left: 20px"><el-icon><Timer /></el-icon> 招聘人数：{{ currentJob.headcount || '若干' }}</span>
+          </div>
+          <el-divider />
+          <h4>职位描述</h4>
+          <div style="white-space: pre-wrap;">{{ currentJob.description }}</div>
+          <el-divider />
+          <h4>技能要求</h4>
+          <div style="white-space: pre-wrap;">{{ currentJob.skills || '未填写' }}</div>
+          <el-divider />
+          <h4>公司信息</h4>
+          <p>{{ currentJob.company?.name || '-' }}</p>
+        </div>
+        <template #footer>
+          <span class="dialog-footer">
+            <el-button @click="detailVisible = false">关闭</el-button>
+            <el-button type="primary" @click="apply(currentJob)">立即投递</el-button>
+          </span>
+        </template>
+      </el-dialog>
+
   </div>
 </template>
 
@@ -88,7 +89,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { getJobs } from '@/api/job'
 import { applyJob } from '@/api/student'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { OfficeBuilding, Location, School, Timer } from '@element-plus/icons-vue'
+import { OfficeBuilding, Location, Timer } from '@element-plus/icons-vue'
 
 const jobs = ref([])
 const loading = ref(false)
@@ -98,13 +99,24 @@ const currentJob = ref(null)
 const filters = reactive({
   keyword: '',
   industry: '',
-  location: ''
+  location: '',
+  jobType: ''
 })
+
+const cleanParams = () => {
+  const params = {}
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value && value.toString().trim() !== '') {
+      params[key] = value
+    }
+  })
+  return params
+}
 
 const fetchJobs = async () => {
   loading.value = true
   try {
-    const data = await getJobs(filters)
+    const data = await getJobs(cleanParams())
     jobs.value = data || []
   } catch (error) {
     console.error(error)
