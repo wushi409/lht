@@ -5,8 +5,10 @@ import com.campus.jobfair.entity.Job;
 import com.campus.jobfair.entity.Resume;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.enums.ApplicationStatus;
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ApplicationRecordRepository extends JpaRepository<ApplicationRecord, Long> {
@@ -23,4 +25,8 @@ public interface ApplicationRecordRepository extends JpaRepository<ApplicationRe
 
     @org.springframework.data.jpa.repository.Query("SELECT a FROM ApplicationRecord a LEFT JOIN FETCH a.job j LEFT JOIN FETCH j.company c LEFT JOIN FETCH a.student LEFT JOIN FETCH a.resume WHERE c.creditCode = :companyUsername")
     List<ApplicationRecord> findByCompanyUsername(@org.springframework.data.repository.query.Param("companyUsername") String companyUsername);
+
+    List<ApplicationRecord> findByCreatedAtBetween(Instant start, Instant end);
+    
+    long countByStudentId(Long studentId);
 }

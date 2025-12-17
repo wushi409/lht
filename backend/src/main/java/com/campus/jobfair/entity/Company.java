@@ -36,6 +36,9 @@ public class Company extends BaseEntity {
 
     private String logoUrl;
 
+    @Column(length = 255)
+    private String licenseUrl;
+
     @Column(length = 100)
     private String contactName;
 

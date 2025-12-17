@@ -5,7 +5,7 @@
       
       <el-table :data="interviews" v-loading="loading" stripe>
         <el-table-column label="职位" prop="job.title" min-width="140" />
-        <el-table-column label="公司" prop="company.name" min-width="120" />
+        <el-table-column label="公司" prop="job.company.name" min-width="120" />
         <el-table-column label="面试时间" min-width="150">
           <template #default="{ row }">{{ formatDateTime(row.scheduledAt) }}</template>
         </el-table-column>

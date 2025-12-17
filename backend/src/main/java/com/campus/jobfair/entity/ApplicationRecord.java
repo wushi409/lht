@@ -34,7 +34,7 @@ public class ApplicationRecord extends BaseEntity {
     private Resume resume;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30)
     private ApplicationStatus status = ApplicationStatus.SUBMITTED;
 
     @Column(length = 500)

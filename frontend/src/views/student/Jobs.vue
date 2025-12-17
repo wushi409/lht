@@ -18,6 +18,23 @@
         <el-form-item label="地点">
           <el-input v-model="filters.location" placeholder="工作地点" clearable style="width: 160px" />
         </el-form-item>
+        <el-form-item label="职位类型">
+          <el-select v-model="filters.jobType" placeholder="不限" clearable style="width: 160px">
+            <el-option label="不限" value="" />
+            <el-option label="全职" value="全职" />
+            <el-option label="实习" value="实习" />
+            <el-option label="兼职" value="兼职" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="薪资">
+          <el-select v-model="filters.salary" placeholder="不限" clearable style="width: 160px">
+            <el-option label="不限" value="" />
+            <el-option label="5k以下" value="lt5" />
+            <el-option label="5k-10k" value="5-10" />
+            <el-option label="10k-15k" value="10-15" />
+            <el-option label="15k以上" value="gte15" />
+          </el-select>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="fetchJobs">搜索</el-button>
         </el-form-item>
@@ -107,7 +124,7 @@ const loading = ref(false)
 const applying = ref(false)
 const dialogVisible = ref(false)
 const currentJob = ref(null)
-const filters = reactive({ keyword: '', industry: '', location: '' })
+const filters = reactive({ keyword: '', industry: '', location: '', jobType: '', salary: '' })
 
 // 投递相关
 const applyDialogVisible = ref(false)
@@ -115,6 +132,23 @@ const applyJobData = ref(null)
 const resumes = ref([])
 const selectedResumeId = ref(null)
 const loadingResumes = ref(false)
+
+const parseSalaryLower = (range) => {
+  if (!range) return null
+  const m = String(range).match(/(\d+)/)
+  return m ? Number(m[1]) : null
+}
+
+const matchSalary = (salaryRange, level) => {
+  if (!level) return true
+  const lower = parseSalaryLower(salaryRange)
+  if (lower == null) return false
+  if (level === 'lt5') return lower < 5
+  if (level === '5-10') return lower >= 5 && lower < 10
+  if (level === '10-15') return lower >= 10 && lower < 15
+  if (level === 'gte15') return lower >= 15
+  return true
+}
 
 const fetchJobs = async () => {
   loading.value = true
@@ -124,7 +158,9 @@ const fetchJobs = async () => {
     if (filters.keyword) params.keyword = filters.keyword
     if (filters.industry) params.industry = filters.industry
     if (filters.location) params.location = filters.location
-    jobs.value = await getJobs(params) || []
+    if (filters.jobType) params.jobType = filters.jobType
+    const raw = await getJobs(params) || []
+    jobs.value = raw.filter(job => matchSalary(job.salaryRange, filters.salary))
   } catch (e) {
     console.error(e)
   } finally {

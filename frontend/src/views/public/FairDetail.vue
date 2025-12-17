@@ -27,19 +27,21 @@
        </el-card>
 
        <el-card class="box-card">
-         <template #header>
-           <div class="card-header">
-             <span>已报名企业 ({{ companies.length }})</span>
+        <template #header>
+          <div class="card-header">
+            <span>参会企业及展位 ({{ booths.length }})</span>
+          </div>
+        </template>
+        <div class="companies-list" v-if="booths.length > 0">
+           <div v-for="item in booths" :key="item.id" class="company-item">
+              <div class="co-logo">{{ (item.companyName || 'Co').substring(0,2) }}</div>
+              <div class="co-name">{{ item.companyName }}</div>
+              <div class="co-booth">展位号：{{ item.boothNo }}</div>
+              <div class="co-location" v-if="item.location">位置：{{ item.location }}</div>
            </div>
-         </template>
-         <div class="companies-list" v-if="companies.length > 0">
-            <div v-for="company in companies" :key="company.id" class="company-item">
-               <div class="co-logo">{{ (company.name || 'Co').substring(0,2) }}</div>
-               <div class="co-name">{{ company.name }}</div>
-            </div>
-         </div>
-         <el-empty v-else description="暂无企业报名" />
-       </el-card>
+        </div>
+        <el-empty v-else description="暂无企业报名" />
+      </el-card>
     </div>
     <el-empty v-else-if="!loading" description="未找到该双选会信息" />
   </div>
@@ -54,28 +56,30 @@ import { Clock, Location } from '@element-plus/icons-vue'
 const route = useRoute()
 const router = useRouter()
 const fair = ref(null)
-const companies = ref([])
+const booths = ref([])
 const loading = ref(false)
 
 const fetchData = async () => {
   loading.value = true
   try {
     const id = route.params.id
-    // Mocking check, normally fetch by ID
-    // fair.value = await request.get(`/job-fairs/${id}`)
-    
-    // Fallback Mock for demo if ID not valid or API missing
-    const allFairs = await request.get('/job-fairs') || []
-    fair.value = allFairs.find(f => f.id == id) || allFairs[0] || {
-        name: '2025春季大型双选会',
-        startTime: '2025-03-20',
-        endTime: '2025-03-25',
-        location: '体育馆',
-        description: '这是本次春季双选会的详细介绍信息...'
-    }
 
-    // Mock companies
-    companies.value = Array(8).fill(null).map((_, i) => ({ id: i, name: `参会企业示例${i+1}` }))
+    // 获取双选会基本信息
+    const allFairs = await request.get('/job-fairs') || []
+    fair.value = allFairs.find(f => f.id == id) || allFairs[0] || null
+
+    // 获取展位及参会企业信息
+    if (fair.value) {
+      const boothList = await request.get(`/job-fairs/${fair.value.id}/booths`) || []
+      booths.value = boothList.map(b => ({
+        id: b.id,
+        companyName: b.company?.name || '企业',
+        boothNo: b.boothNo,
+        location: b.location
+      }))
+    } else {
+      booths.value = []
+    }
 
   } catch (e) {
     console.error(e)

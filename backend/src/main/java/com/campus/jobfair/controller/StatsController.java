@@ -66,4 +66,10 @@ public class StatsController {
     public ResponseEntity<ApiResponse<List<Map<String, Object>>>> topJobs() {
         return ResponseEntity.ok(ApiResponse.ok(statsService.topJobs()));
     }
+
+    @GetMapping("/admin/stats/job-intents")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ApiResponse<List<Map<String, Object>>>> jobIntents() {
+        return ResponseEntity.ok(ApiResponse.ok(statsService.jobIntentStats()));
+    }
 }

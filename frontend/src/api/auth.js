@@ -31,3 +31,19 @@ export function resetPassword(data) {
     data
   })
 }
+
+export function sendCode(data) {
+  return request({
+    url: '/auth/send-code',
+    method: 'post',
+    data
+  })
+}
+
+export function codeLogin(data) {
+  return request({
+    url: '/auth/code-login',
+    method: 'post',
+    data
+  })
+}

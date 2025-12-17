@@ -1,6 +1,8 @@
 package com.campus.jobfair.controller;
 
 import com.campus.jobfair.dto.ApiResponse;
+import com.campus.jobfair.dto.JobFairEventRequest;
+import com.campus.jobfair.dto.JobFairRequest;
 import com.campus.jobfair.entity.EventRegistration;
 import com.campus.jobfair.entity.JobFair;
 import com.campus.jobfair.entity.JobFairEvent;
@@ -11,6 +13,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -22,11 +26,6 @@ public class EventController {
 
     public EventController(EventService eventService) {
         this.eventService = eventService;
-    }
-
-    @GetMapping("/job-fairs")
-    public ResponseEntity<ApiResponse<List<JobFair>>> listFairs() {
-        return ResponseEntity.ok(ApiResponse.ok(eventService.listJobFairs()));
     }
 
     @GetMapping("/events")
@@ -46,8 +45,31 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/checkin/{token}")
+    public ResponseEntity<ApiResponse<java.util.Map<String, String>>> scanCheckin(@PathVariable String token) {
+        try {
+            Long registrationId = Long.parseLong(token);
+            EventRegistration registration = eventService.checkIn(registrationId);
+            
+            java.util.Map<String, String> result = new java.util.HashMap<>();
+            result.put("studentName", registration.getStudent() != null ? registration.getStudent().getName() : "未知");
+            result.put("eventName", registration.getEvent() != null ? registration.getEvent().getName() : "未知");
+            
+            return ResponseEntity.ok(ApiResponse.ok("签到成功", result));
+        } catch (NumberFormatException e) {
+            return ResponseEntity.badRequest().body(ApiResponse.fail("无效的签到码"));
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/event-registrations")
     public ResponseEntity<ApiResponse<List<EventRegistration>>> listRegistrations(@org.springframework.web.bind.annotation.RequestParam(required = false) Long eventId) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/events/{eventId}/registrations")
+    public ResponseEntity<ApiResponse<List<EventRegistration>>> getEventRegistrations(@PathVariable Long eventId) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));
     }
 }

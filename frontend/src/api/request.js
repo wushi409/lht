@@ -2,9 +2,9 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
 
-// 动态基础地址：优先使用环境变量 VITE_API_BASE，其次回退到本地后端默认端口
+// 动态基础地址：开发环境使用代理，生产环境使用环境变量或默认地址
 const service = axios.create({
-  baseURL: (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_BASE) || 'http://localhost:8080',
+  baseURL: import.meta.env.DEV ? '/api' : (import.meta.env.VITE_API_BASE || 'http://localhost:8080'),
   timeout: 10000
 })
 

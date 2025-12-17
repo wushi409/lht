@@ -33,7 +33,7 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/actuator/**", "/public/**", "/announcements", "/announcements/**", "/jobs", "/jobs/**", "/companies", "/companies/**", "/job-fairs/**", "/events", "/events/**").permitAll()
+                        .requestMatchers("/auth/**", "/actuator/**", "/public/**", "/announcements", "/announcements/**", "/jobs", "/jobs/**", "/companies", "/companies/**", "/job-fairs/**", "/events", "/events/**", "/files/**").permitAll()
                         .anyRequest().authenticated())
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

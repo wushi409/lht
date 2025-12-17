@@ -7,7 +7,10 @@
     
     <div class="company-grid" v-loading="loading">
        <div v-for="company in companies" :key="company.id" class="company-card" @click="showDetail(company)">
-          <div class="logo-box">{{ (company.name || '企').substring(0,2) }}</div>
+          <div class="logo-box">
+            <img v-if="company.logoUrl" :src="getLogoUrl(company.logoUrl)" :alt="company.name" class="logo-img" />
+            <span v-else>{{ (company.name || '企').substring(0,2) }}</span>
+          </div>
           <div class="info">
             <h4 class="name">{{ company.name }}</h4>
             <div class="industry">{{ company.industry || '行业未知' }}</div>
@@ -23,7 +26,10 @@
     <el-dialog v-model="dialogVisible" title="企业详情" width="550px">
       <div v-if="currentCompany">
         <div class="detail-header">
-          <div class="detail-logo">{{ (currentCompany.name || '企').substring(0,2) }}</div>
+          <div class="detail-logo">
+            <img v-if="currentCompany.logoUrl" :src="getLogoUrl(currentCompany.logoUrl)" :alt="currentCompany.name" style="width: 100%; height: 100%; object-fit: contain;" />
+            <span v-else>{{ (currentCompany.name || '企').substring(0,2) }}</span>
+          </div>
           <div>
             <h2>{{ currentCompany.name }}</h2>
             <div class="detail-tags">
@@ -46,16 +52,20 @@
       </div>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="$router.push('/login')">登录查看职位</el-button>
+        <el-button type="primary" @click="handleViewJobs">{{ viewJobsButtonText }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import request from '@/api/request'
 
+const router = useRouter()
+const userStore = useUserStore()
 const companies = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -77,6 +87,34 @@ const showDetail = (company) => {
   dialogVisible.value = true
 }
 
+const getLogoUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return '/api' + url
+}
+
+const viewJobsButtonText = computed(() => {
+  return userStore.token ? '查看职位' : '登录查看职位'
+})
+
+const handleViewJobs = () => {
+  if (!userStore.token) {
+    router.push('/login')
+    return
+  }
+  
+  // 根据角色跳转
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/jobs')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  } else {
+    router.push('/login')
+  }
+}
+
 onMounted(fetchCompanies)
 </script>
 
@@ -90,14 +128,15 @@ onMounted(fetchCompanies)
 .company-card { background: white; border: 1px solid #eee; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; border-radius: 4px; }
 .company-card:hover { border-color: #1e40af; transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
 
-.logo-box { width: 60px; height: 60px; background: #f0f7ff; color: #1e40af; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 16px; }
+.logo-box { width: 60px; height: 60px; background: #f0f7ff; color: #1e40af; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 12px; margin: 0 auto 16px; overflow: hidden; }
+.logo-img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; }
 .name { font-size: 16px; color: #333; margin: 0 0 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .industry { font-size: 12px; color: #999; margin-bottom: 12px; }
 
 /* Detail Dialog */
 .detail-header { display: flex; gap: 16px; align-items: center; }
 .detail-header h2 { margin: 0 0 8px; font-size: 20px; }
-.detail-logo { width: 60px; height: 60px; background: #f0f7ff; color: #1e40af; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; }
+.detail-logo { width: 60px; height: 60px; background: #f0f7ff; color: #1e40af; font-size: 20px; font-weight: 700; display: flex; align-items: center; justify-content: center; border-radius: 12px; flex-shrink: 0; overflow: hidden; }
 .detail-tags { display: flex; gap: 8px; flex-wrap: wrap; }
 .detail-section { margin-bottom: 16px; }
 .detail-section h4 { margin: 0 0 8px; font-size: 14px; color: #374151; }

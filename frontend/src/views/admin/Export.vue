@@ -10,7 +10,7 @@
       
       <el-table :data="tasks" v-loading="loading" stripe>
         <el-table-column label="导出类型" min-width="120">
-          <template #default="{ row }">{{ typeText(row.exportType) }}</template>
+          <template #default="{ row }">{{ typeText(row.type) }}</template>
         </el-table-column>
         <el-table-column label="创建时间" min-width="150">
           <template #default="{ row }">{{ formatDateTime(row.createdAt) }}</template>
@@ -33,11 +33,11 @@
     <el-dialog v-model="dialogVisible" title="新建导出任务" width="400px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="导出类型" required>
-          <el-select v-model="form.exportType" style="width:100%">
-            <el-option label="学生数据" value="STUDENTS" />
-            <el-option label="企业数据" value="COMPANIES" />
-            <el-option label="职位数据" value="JOBS" />
-            <el-option label="投递数据" value="APPLICATIONS" />
+          <el-select v-model="form.type" style="width:100%">
+            <el-option label="学生投递数据" value="STUDENT_APPLICATIONS" />
+            <el-option label="企业参与数据" value="COMPANY_PARTICIPATION" />
+            <el-option label="就业统计数据" value="EMPLOYMENT_STATS" />
+            <el-option label="系统日志" value="LOGS" />
           </el-select>
         </el-form-item>
       </el-form>
@@ -58,7 +58,7 @@ const tasks = ref([])
 const loading = ref(false)
 const creating = ref(false)
 const dialogVisible = ref(false)
-const form = reactive({ exportType: 'STUDENTS' })
+const form = reactive({ type: 'STUDENT_APPLICATIONS' })
 
 const fetchTasks = async () => {
   loading.value = true
@@ -72,7 +72,7 @@ const fetchTasks = async () => {
 }
 
 const openCreate = () => {
-  form.exportType = 'STUDENTS'
+  form.type = 'STUDENT_APPLICATIONS'
   dialogVisible.value = true
 }
 
@@ -90,9 +90,25 @@ const handleCreate = async () => {
   }
 }
 
-const download = (row) => {
-  if (row.fileUrl) {
-    window.open(row.fileUrl, '_blank')
+const download = async (row) => {
+  try {
+    const result = await request.get(`/admin/exports/${row.id}/download`)
+    if (result) {
+      // 创建 Blob 并触发下载
+      const blob = new Blob([result], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.href = url
+      link.download = `export_${typeText(row.type)}_${row.id}.csv`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      ElMessage.success('导出成功')
+    }
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('下载失败')
   }
 }
 
@@ -103,7 +119,12 @@ const formatDateTime = (date) => {
 }
 
 const typeText = (type) => {
-  const map = { STUDENTS: '学生数据', COMPANIES: '企业数据', JOBS: '职位数据', APPLICATIONS: '投递数据' }
+  const map = { 
+    STUDENT_APPLICATIONS: '学生投递数据', 
+    COMPANY_PARTICIPATION: '企业参与数据', 
+    EMPLOYMENT_STATS: '就业统计数据', 
+    LOGS: '系统日志' 
+  }
   return map[type] || type
 }
 

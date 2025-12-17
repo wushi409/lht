@@ -41,12 +41,29 @@ public class FileStorageService {
             resource.setOwnerType(ownerType);
             resource.setOwnerId(ownerId);
             resource.setFileName(file.getOriginalFilename());
-            resource.setUrl(target.toString());
+            // 保存为HTTP访问路径，而不是文件系统路径
+            resource.setUrl("/files/" + filename);
             resource.setContentType(file.getContentType());
             resource.setSize(file.getSize());
             return fileResourceRepository.save(resource);
         } catch (IOException e) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "文件保存失败");
+        }
+    }
+    
+    public Path loadFile(String filename) {
+        try {
+            Path dir = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path file = dir.resolve(filename).normalize();
+            if (!file.startsWith(dir)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "非法文件路径");
+            }
+            if (!Files.exists(file)) {
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND, "文件不存在");
+            }
+            return file;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "文件加载失败");
         }
     }
 }

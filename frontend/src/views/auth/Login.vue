@@ -12,16 +12,23 @@
         <el-tab-pane label="管理员" name="admin"></el-tab-pane>
       </el-tabs>
 
+      <div class="login-mode">
+        <el-radio-group v-model="loginMethod" size="small">
+          <el-radio-button label="password">密码登录</el-radio-button>
+          <el-radio-button label="code">验证码登录</el-radio-button>
+        </el-radio-group>
+      </div>
+
       <el-form ref="formRef" :model="form" :rules="rules" @submit.prevent="handleLogin" class="login-form">
         <el-form-item prop="username">
           <el-input 
             v-model="form.username" 
-            :placeholder="activeTab === 'company' ? '企业账号' : '学号/用户名'" 
+            :placeholder="activeTab === 'student' ? '学号/手机号' : (activeTab === 'company' ? '企业账号' : '管理员账号')" 
             size="large" 
             prefix-icon="User" 
           />
         </el-form-item>
-        <el-form-item prop="password">
+        <el-form-item v-if="loginMethod === 'password'" prop="password">
           <el-input 
             v-model="form.password" 
             type="password" 
@@ -30,6 +37,22 @@
             prefix-icon="Lock" 
             show-password 
           />
+        </el-form-item>
+        <el-form-item v-else prop="code">
+          <el-row :gutter="8" style="width: 100%">
+            <el-col :span="16">
+              <el-input
+                v-model="form.code"
+                placeholder="请输入验证码"
+                size="large"
+              />
+            </el-col>
+            <el-col :span="8">
+              <el-button type="primary" size="large" :loading="sendingCode" @click="handleSendCode" style="width: 100%">
+                发送验证码
+              </el-button>
+            </el-col>
+          </el-row>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" size="large" :loading="loading" native-type="submit" style="width: 100%">
@@ -41,7 +64,7 @@
       <div class="links">
         <router-link to="/register/student" v-if="activeTab === 'student'">注册学生账号</router-link>
         <router-link to="/register/company" v-if="activeTab === 'company'">企业入驻申请</router-link>
-        <span v-if="activeTab === 'admin'"></span>
+        <router-link to="/reset-password" v-if="loginMethod === 'code'">忘记密码？</router-link>
         <el-button link type="info" size="small" @click="$router.push('/')">返回首页</el-button>
       </div>
     </div>
@@ -52,7 +75,7 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUserStore } from '@/stores/user'
-import { login } from '@/api/auth'
+import { login, sendCode, codeLogin } from '@/api/auth'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
 
@@ -62,11 +85,33 @@ const userStore = useUserStore()
 const formRef = ref()
 const loading = ref(false)
 const activeTab = ref('student')
+const loginMethod = ref('password')
 
-const form = reactive({ username: '', password: '' })
+const sendingCode = ref(false)
+
+const form = reactive({ username: '', password: '', code: '' })
 const rules = {
   username: [{ required: true, message: '请输入账号', trigger: 'blur' }],
-  password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
+  password: [{ 
+    validator: (rule, value, callback) => {
+      if (loginMethod.value === 'password' && !value) {
+        callback(new Error('请输入密码'))
+      } else {
+        callback()
+      }
+    },
+    trigger: 'blur'
+  }],
+  code: [{
+    validator: (rule, value, callback) => {
+      if (loginMethod.value === 'code' && !value) {
+        callback(new Error('请输入验证码'))
+      } else {
+        callback()
+      }
+    },
+    trigger: 'blur'
+  }]
 }
 
 onMounted(() => {
@@ -84,9 +129,12 @@ const handleLogin = async () => {
   
   loading.value = true
   try {
-    // Assuming backend login is unified or we might need to pass role hint if backend requires it
-    // For now keeping unified login call
-    const data = await login(form)
+    let data
+    if (loginMethod.value === 'password') {
+      data = await login({ username: form.username, password: form.password })
+    } else {
+      data = await codeLogin({ username: form.username, code: form.code })
+    }
     
     // Check if role matches expected tab (optional validation)
     if (activeTab.value === 'student' && data.role !== 'STUDENT') {
@@ -106,6 +154,22 @@ const handleLogin = async () => {
     console.error(e)
   } finally {
     loading.value = false
+  }
+}
+
+const handleSendCode = async () => {
+  if (!form.username) {
+    return ElMessage.warning('请先输入账号或手机号')
+  }
+  sendingCode.value = true
+  try {
+    const code = await sendCode({ username: form.username, scene: 'LOGIN' })
+    // 演示环境直接展示验证码，正式环境可去掉 code 显示
+    ElMessage.success(`验证码已发送：${code}`)
+  } catch (e) {
+    console.error(e)
+  } finally {
+    sendingCode.value = false
   }
 }
 </script>
@@ -142,6 +206,12 @@ const handleLogin = async () => {
 
 .login-tabs { margin-bottom: 20px; }
 :deep(.el-tabs__nav-wrap::after) { height: 1px; }
+
+.login-mode {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
 
 .links {
   display: flex;

@@ -3,6 +3,7 @@ package com.campus.jobfair.service;
 import com.campus.jobfair.entity.ApplicationRecord;
 import com.campus.jobfair.entity.Company;
 import com.campus.jobfair.entity.Job;
+import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.enums.ApplicationStatus;
 import com.campus.jobfair.entity.enums.CompanyStatus;
 import com.campus.jobfair.entity.enums.JobStatus;
@@ -10,11 +11,15 @@ import com.campus.jobfair.repository.ApplicationRecordRepository;
 import com.campus.jobfair.repository.CompanyRepository;
 import com.campus.jobfair.repository.JobRepository;
 import com.campus.jobfair.repository.StudentRepository;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -109,16 +114,36 @@ public class StatsService {
         List<Map<String, Object>> result = new ArrayList<>();
         LocalDate now = LocalDate.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM");
-        
-        // 返回最近6个月的数据
+
+        // 构建最近6个月的时间窗口和初始计数
+        Map<String, Long> monthCount = new LinkedHashMap<>();
+        LocalDate firstMonth = now.minusMonths(5).withDayOfMonth(1);
         for (int i = 5; i >= 0; i--) {
             LocalDate month = now.minusMonths(i);
-            Map<String, Object> map = new HashMap<>();
-            map.put("month", month.format(formatter));
-            // 简化处理：返回模拟数据，实际应该查询数据库
-            map.put("count", applicationRecordRepository.count() / 6);
-            result.add(map);
+            monthCount.put(month.format(formatter), 0L);
         }
+
+        Instant start = firstMonth.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Instant end = now.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant();
+        List<ApplicationRecord> records = applicationRecordRepository.findByCreatedAtBetween(start, end);
+
+        for (ApplicationRecord record : records) {
+            if (record.getCreatedAt() == null) {
+                continue;
+            }
+            LocalDateTime created = LocalDateTime.ofInstant(record.getCreatedAt(), ZoneId.systemDefault());
+            String key = created.format(formatter);
+            if (monthCount.containsKey(key)) {
+                monthCount.put(key, monthCount.get(key) + 1);
+            }
+        }
+
+        monthCount.forEach((month, count) -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("month", month);
+            map.put("count", count);
+            result.add(map);
+        });
         return result;
     }
 
@@ -137,6 +162,36 @@ public class StatsService {
                 })
                 .sorted((a, b) -> ((Integer) b.get("applicationCount")).compareTo((Integer) a.get("applicationCount")))
                 .limit(10)
+                .collect(Collectors.toList());
+    }
+
+    public List<Map<String, Object>> jobIntentStats() {
+        List<Student> students = studentRepository.findAll();
+        Map<String, Long> intentCount = new HashMap<>();
+
+        for (Student student : students) {
+            String intent = student.getJobIntent();
+            if (intent == null || intent.isBlank()) {
+                continue;
+            }
+            String[] parts = intent.split("[,，/、;；\\s]+");
+            for (String raw : parts) {
+                String key = raw.trim();
+                if (key.isEmpty()) {
+                    continue;
+                }
+                intentCount.merge(key, 1L, Long::sum);
+            }
+        }
+
+        return intentCount.entrySet().stream()
+                .sorted((a, b) -> Long.compare(b.getValue(), a.getValue()))
+                .map(e -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("intent", e.getKey());
+                    map.put("count", e.getValue());
+                    return map;
+                })
                 .collect(Collectors.toList());
     }
 }

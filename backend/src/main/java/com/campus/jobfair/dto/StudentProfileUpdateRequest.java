@@ -9,4 +9,5 @@ public class StudentProfileUpdateRequest {
     private String phone;
     private String email;
     private Long defaultResumeId;
+    private String jobIntent;
 }

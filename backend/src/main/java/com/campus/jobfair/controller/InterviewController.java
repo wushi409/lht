@@ -49,7 +49,7 @@ public class InterviewController {
     public ResponseEntity<ApiResponse<Interview>> respond(@AuthenticationPrincipal CustomUserDetails user,
                                                           @PathVariable Long id,
                                                           @RequestBody InterviewStatusUpdateRequest request) {
-        return ResponseEntity.ok(ApiResponse.ok(interviewService.updateStatusForStudent(id, user.getId(), request)));
+        return ResponseEntity.ok(ApiResponse.ok(interviewService.updateStatusForStudent(id, user.getUsername(), request)));
     }
 
     @PreAuthorize("hasRole('COMPANY')")
@@ -68,6 +68,6 @@ public class InterviewController {
     @PreAuthorize("hasRole('STUDENT')")
     @GetMapping("/student/me")
     public ResponseEntity<ApiResponse<List<Interview>>> listStudent(@AuthenticationPrincipal CustomUserDetails user) {
-        return ResponseEntity.ok(ApiResponse.ok(interviewService.listForStudent(user.getId())));
+        return ResponseEntity.ok(ApiResponse.ok(interviewService.listForStudent(user.getUsername())));
     }
 }

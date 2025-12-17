@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS companies (
   industry VARCHAR(50),
   description VARCHAR(500),
   logo_url VARCHAR(255),
+  license_url VARCHAR(255),
   contact_name VARCHAR(100),
   contact_phone VARCHAR(50),
   contact_email VARCHAR(100),
@@ -36,6 +37,7 @@ CREATE TABLE IF NOT EXISTS students (
   college VARCHAR(100),
   phone VARCHAR(50),
   email VARCHAR(100),
+  job_intent VARCHAR(200),
   default_resume_id BIGINT,
   CONSTRAINT uk_students_no UNIQUE (student_no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -155,7 +157,7 @@ CREATE TABLE IF NOT EXISTS applications (
   job_id BIGINT,
   student_id BIGINT,
   resume_id BIGINT,
-  status VARCHAR(20) NOT NULL DEFAULT 'SUBMITTED',
+  status VARCHAR(30) NOT NULL DEFAULT 'SUBMITTED',
   notes VARCHAR(500),
   withdrawn_at DATETIME(6),
   KEY idx_app_job (job_id),
@@ -251,7 +253,7 @@ CREATE TABLE IF NOT EXISTS event_registrations (
   CONSTRAINT fk_event_reg_student FOREIGN KEY (student_id) REFERENCES students(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Export tasks and audit logs
+-- Export tasks
 CREATE TABLE IF NOT EXISTS export_tasks (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
@@ -267,17 +269,17 @@ CREATE TABLE IF NOT EXISTS export_tasks (
   error_message VARCHAR(200)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS audit_logs (
+-- Verification codes for login and password reset
+CREATE TABLE IF NOT EXISTS verification_codes (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   created_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
   updated_at DATETIME(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
-  actor_role VARCHAR(20) NOT NULL,
-  actor_id BIGINT NOT NULL,
-  action VARCHAR(200) NOT NULL,
-  detail VARCHAR(1000),
-  success TINYINT(1) NOT NULL DEFAULT 0,
-  ip VARCHAR(50),
-  KEY idx_audit_actor (actor_role, actor_id)
+  username VARCHAR(100) NOT NULL,
+  scene VARCHAR(30) NOT NULL,
+  code VARCHAR(10) NOT NULL,
+  expire_at DATETIME(6) NOT NULL,
+  used TINYINT(1) NOT NULL DEFAULT 0,
+  KEY idx_verification_user_scene (username, scene)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- User accounts (after students/companies exist)

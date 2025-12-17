@@ -29,6 +29,7 @@ public class StudentService {
         if (request.getCollege() != null) student.setCollege(request.getCollege());
         if (request.getPhone() != null) student.setPhone(request.getPhone());
         if (request.getEmail() != null) student.setEmail(request.getEmail());
+        if (request.getJobIntent() != null) student.setJobIntent(request.getJobIntent());
         if (request.getDefaultResumeId() != null) student.setDefaultResumeId(request.getDefaultResumeId());
         return studentRepository.save(student);
     }

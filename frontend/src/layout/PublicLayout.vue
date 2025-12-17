@@ -5,7 +5,16 @@
       <div class="container top-bar-inner">
         <span>欢迎访问大学生就业创业指导服务平台</span>
         <div class="top-actions">
-           <el-button link class="top-link" @click="$router.push('/login')">用户登录</el-button>
+          <template v-if="userStore.token">
+            <span class="user-info-text">{{ roleLabel }} - {{ userStore.userInfo?.username || '用户' }}</span>
+            <el-divider direction="vertical" />
+            <el-button link class="top-link" @click="goToUserCenter">进入管理</el-button>
+            <el-divider direction="vertical" />
+            <el-button link class="top-link" @click="handleLogout">退出登录</el-button>
+          </template>
+          <template v-else>
+            <el-button link class="top-link" @click="$router.push('/login')">用户登录</el-button>
+          </template>
         </div>
       </div>
     </div>
@@ -74,17 +83,39 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import { Search } from '@element-plus/icons-vue'
 
 const router = useRouter()
+const userStore = useUserStore()
 const searchText = ref('')
+
+const roleLabel = computed(() => {
+  const map = { STUDENT: '学生', COMPANY: '企业', ADMIN: '管理员' }
+  return map[userStore.role] || '用户'
+})
 
 const handleSearch = () => {
   if (searchText.value.trim()) {
     router.push({ path: '/public/jobs', query: { keyword: searchText.value.trim() } })
   }
+}
+
+const goToUserCenter = () => {
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/profile')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  }
+}
+
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/')
 }
 </script>
 
@@ -114,8 +145,9 @@ const handleSearch = () => {
   display: flex;
   justify-content: space-between;
 }
-.top-actions { display: flex; align-items: center; }
+.top-actions { display: flex; align-items: center; gap: 4px; }
 .top-link { padding: 0 5px; font-size: 12px; color: #666; }
+.user-info-text { font-size: 12px; color: #1e40af; font-weight: 500; }
 
 /* Header */
 .header {

@@ -34,6 +34,10 @@
         <p><strong>联系人：</strong>{{ current.contactName }}</p>
         <p><strong>联系电话：</strong>{{ current.contactPhone }}</p>
         <p><strong>联系邮箱：</strong>{{ current.contactEmail }}</p>
+        <p v-if="current.licenseUrl">
+          <strong>资质证明：</strong>
+          <el-link :href="current.licenseUrl" target="_blank" type="primary">点击查看</el-link>
+        </p>
         <el-divider />
         <p><strong>企业简介：</strong></p>
         <p>{{ current.description || '暂无' }}</p>

@@ -51,6 +51,14 @@
             </el-form-item>
           </el-col>
         </el-row>
+        <el-form-item label="求职方向">
+          <el-input
+            v-model="form.jobIntent"
+            type="textarea"
+            :rows="3"
+            placeholder="如：前端开发 / Java 后端 / 产品经理等"
+          />
+        </el-form-item>
       </el-form>
     </el-card>
   </div>
@@ -64,7 +72,7 @@ import { ElMessage } from 'element-plus'
 const loading = ref(false)
 const saving = ref(false)
 const editing = ref(false)
-const form = reactive({ studentNo: '', name: '', college: '', major: '', phone: '', email: '' })
+const form = reactive({ studentNo: '', name: '', college: '', major: '', phone: '', email: '', jobIntent: '' })
 const original = ref({})
 
 const fetchProfile = async () => {

@@ -16,6 +16,28 @@ export const companyApi = {
     })
   },
 
+  uploadLogo(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request({
+      url: '/companies/me/logo',
+      method: 'post',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+
+  uploadLicense(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return request({
+      url: '/companies/me/license',
+      method: 'post',
+      data: formData,
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+
   createJob(data) {
     return request({
       url: '/jobs',

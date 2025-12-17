@@ -55,17 +55,21 @@
       </div>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="$router.push('/login')">登录报名</el-button>
+        <el-button type="primary" @click="handleAction">{{ actionButtonText }}</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import request from '@/api/request'
 import { Clock, Location, User } from '@element-plus/icons-vue'
 
+const router = useRouter()
+const userStore = useUserStore()
 const events = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -108,6 +112,28 @@ const eventTypeText = (type) => {
     'WORKSHOP': '工作坊'
   }
   return map[type] || type
+}
+
+const actionButtonText = computed(() => {
+  return userStore.token ? '查看详情' : '登录报名'
+})
+
+const handleAction = () => {
+  if (!userStore.token) {
+    router.push('/login')
+    return
+  }
+  
+  // 根据角色跳转
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/events')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/profile')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  } else {
+    router.push('/login')
+  }
 }
 
 onMounted(fetchEvents)

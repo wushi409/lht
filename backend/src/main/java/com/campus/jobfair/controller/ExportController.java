@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,5 +37,16 @@ public class ExportController {
     public ResponseEntity<ApiResponse<ExportTask>> create(@AuthenticationPrincipal CustomUserDetails user,
                                                           @Valid @RequestBody ExportTaskRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(exportService.createTask(user.getRole(), user.getId(), request)));
+    }
+
+    @GetMapping("/{id}/download")
+    public ResponseEntity<ApiResponse<String>> download(@PathVariable Long id) {
+        ExportTask task = exportService.getById(id);
+        if (task == null || task.getStatus() != com.campus.jobfair.entity.enums.ExportStatus.COMPLETED) {
+            return ResponseEntity.badRequest().body(ApiResponse.fail("任务不存在或未完成"));
+        }
+        // 生成并返回实际的导出数据
+        String exportData = exportService.generateExportData(task);
+        return ResponseEntity.ok(ApiResponse.ok(exportData));
     }
 }

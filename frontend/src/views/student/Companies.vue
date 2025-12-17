@@ -25,7 +25,10 @@
       <el-col :xs="24" :sm="12" :lg="8" v-for="company in filteredList" :key="company.id">
         <el-card class="company-card" shadow="hover" @click="viewDetail(company)">
           <div class="company-header">
-            <div class="avatar">{{ (company.name || '企').charAt(0) }}</div>
+            <div class="avatar">
+              <img v-if="company.logoUrl" :src="getLogoUrl(company.logoUrl)" :alt="company.name" class="logo-img" />
+              <span v-else>{{ (company.name || '企').charAt(0) }}</span>
+            </div>
             <div class="info">
               <h3>{{ company.name }}</h3>
               <div class="tags">
@@ -43,9 +46,16 @@
 
     <el-dialog v-model="dialogVisible" title="企业详情" width="550px">
       <div v-if="current">
-        <h2 style="margin:0 0 16px">{{ current.name }}</h2>
-        <p><strong>行业：</strong>{{ current.industry || '未分类' }}</p>
-        <p><strong>规模：</strong>{{ current.scale || '未知' }}</p>
+        <div style="display: flex; gap: 16px; align-items: flex-start; margin-bottom: 16px;">
+          <div v-if="current.logoUrl" style="width: 80px; height: 80px; flex-shrink: 0; border: 1px solid #eee; border-radius: 8px; overflow: hidden;">
+            <img :src="getLogoUrl(current.logoUrl)" :alt="current.name" style="width: 100%; height: 100%; object-fit: contain;" />
+          </div>
+          <div style="flex: 1;">
+            <h2 style="margin:0 0 8px">{{ current.name }}</h2>
+            <p style="margin: 4px 0;"><strong>行业：</strong>{{ current.industry || '未分类' }}</p>
+            <p style="margin: 4px 0;"><strong>规模：</strong>{{ current.scale || '未知' }}</p>
+          </div>
+        </div>
         <el-divider />
         <p><strong>企业简介：</strong></p>
         <p>{{ current.description || '暂无' }}</p>
@@ -104,6 +114,12 @@ const viewDetail = (company) => {
   dialogVisible.value = true
 }
 
+const getLogoUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return '/api' + url
+}
+
 onMounted(fetchCompanies)
 </script>
 
@@ -116,6 +132,10 @@ onMounted(fetchCompanies)
   background: linear-gradient(135deg, #667eea, #764ba2);
   color: white; display: flex; align-items: center; justify-content: center;
   font-size: 20px; font-weight: 600;
+  overflow: hidden;
+}
+.logo-img {
+  max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; background: white;
 }
 .info h3 { margin: 0 0 6px; font-size: 15px; }
 .tags { display: flex; gap: 6px; }

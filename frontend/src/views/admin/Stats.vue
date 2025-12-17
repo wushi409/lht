@@ -42,6 +42,30 @@
       </el-col>
     </el-row>
 
+    <el-row :gutter="16" style="margin-top: 16px">
+      <el-col :span="24">
+        <el-card>
+          <template #header>近6个月投递趋势</template>
+          <div ref="trendChart" style="height: 320px"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <el-row :gutter="16" style="margin-top: 16px">
+      <el-col :span="12">
+        <el-card>
+          <template #header>投递状态分布</template>
+          <div ref="statusChart" style="height: 300px"></div>
+        </el-card>
+      </el-col>
+      <el-col :span="12">
+        <el-card>
+          <template #header>学生求职方向</template>
+          <div ref="intentChart" style="height: 300px"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
     <el-card style="margin-top: 16px">
       <template #header>热门职位 TOP 10</template>
       <el-table :data="topJobs" stripe>
@@ -64,13 +88,49 @@ const stats = ref({})
 const topJobs = ref([])
 const industryChart = ref(null)
 const jobTypeChart = ref(null)
+const trendChart = ref(null)
+const statusChart = ref(null)
+const intentChart = ref(null)
+
+const STATUS_LABEL_MAP = {
+  SUBMITTED: '已投递',
+  INTERVIEW: '面试中',
+  HIRED: '已录用',
+  REJECTED: '已拒绝',
+  WITHDRAWN: '已撤回'
+}
 
 let industryChartInstance = null
 let jobTypeChartInstance = null
+let trendChartInstance = null
+let statusChartInstance = null
+let intentChartInstance = null
 
 const fetchStats = async () => {
   try {
     stats.value = await adminApi.getStatsOverview() || {}
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const fetchTrendStats = async () => {
+  try {
+    const data = await request.get('/admin/stats/trend') || []
+    await nextTick()
+    if (trendChart.value) {
+      trendChartInstance = echarts.init(trendChart.value)
+      trendChartInstance.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: data.map(d => d.month) },
+        yAxis: { type: 'value', name: '投递数' },
+        series: [{
+          type: 'line',
+          smooth: true,
+          data: data.map(d => d.count)
+        }]
+      })
+    }
   } catch (e) {
     console.error(e)
   }
@@ -122,11 +182,58 @@ const fetchTopJobs = async () => {
   }
 }
 
+const fetchApplicationStatusStats = async () => {
+  try {
+    const data = await request.get('/admin/stats/applications') || []
+    await nextTick()
+    if (statusChart.value) {
+      statusChartInstance = echarts.init(statusChart.value)
+      statusChartInstance.setOption({
+        tooltip: { trigger: 'item' },
+        legend: { bottom: 0 },
+        series: [{
+          type: 'pie',
+          radius: '60%',
+          data: data.map(d => ({
+            name: STATUS_LABEL_MAP[d.status] || d.status || '未知',
+            value: d.count
+          }))
+        }]
+      })
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const fetchJobIntentStats = async () => {
+  try {
+    const data = await request.get('/admin/stats/job-intents') || []
+    const top = data.slice(0, 10)
+    await nextTick()
+    if (intentChart.value) {
+      intentChartInstance = echarts.init(intentChart.value)
+      intentChartInstance.setOption({
+        tooltip: { trigger: 'axis' },
+        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
+        xAxis: { type: 'category', data: top.map(d => d.intent), axisLabel: { interval: 0, rotate: 30 } },
+        yAxis: { type: 'value' },
+        series: [{ type: 'bar', data: top.map(d => d.count) }]
+      })
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 onMounted(() => {
   fetchStats()
   fetchIndustryStats()
   fetchJobTypeStats()
   fetchTopJobs()
+  fetchTrendStats()
+   fetchApplicationStatusStats()
+   fetchJobIntentStats()
 })
 </script>
 

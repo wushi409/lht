@@ -7,13 +7,10 @@ import com.campus.jobfair.entity.Job;
 import com.campus.jobfair.entity.Resume;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.enums.ApplicationStatus;
-import com.campus.jobfair.entity.enums.NotificationType;
-import com.campus.jobfair.entity.enums.UserRole;
 import com.campus.jobfair.repository.ApplicationRecordRepository;
 import com.campus.jobfair.repository.JobRepository;
 import com.campus.jobfair.repository.ResumeRepository;
 import com.campus.jobfair.repository.StudentRepository;
-import com.campus.jobfair.service.NotificationService;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -28,18 +25,15 @@ public class ApplicationService {
     private final StudentRepository studentRepository;
     private final JobRepository jobRepository;
     private final ResumeRepository resumeRepository;
-    private final NotificationService notificationService;
 
     public ApplicationService(ApplicationRecordRepository applicationRecordRepository,
                               StudentRepository studentRepository,
                               JobRepository jobRepository,
-                              ResumeRepository resumeRepository,
-                              NotificationService notificationService) {
+                              ResumeRepository resumeRepository) {
         this.applicationRecordRepository = applicationRecordRepository;
         this.studentRepository = studentRepository;
         this.jobRepository = jobRepository;
         this.resumeRepository = resumeRepository;
-        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -88,8 +82,7 @@ public class ApplicationService {
             record.setResume(resume);
         }
         ApplicationRecord saved = applicationRecordRepository.save(record);
-        notificationService.send(UserRole.COMPANY, job.getCompany().getId(),
-                "新的简历投递", "岗位" + job.getTitle() + "收到新的投递", NotificationType.APPLICATION_STATUS);
+        // 通知功能已移除
         return saved;
     }
 
@@ -114,8 +107,7 @@ public class ApplicationService {
         record.setStatus(req.getStatus());
         record.setNotes(req.getNotes());
         ApplicationRecord saved = applicationRecordRepository.save(record);
-        notificationService.send(UserRole.STUDENT, record.getStudent().getId(),
-                "投递状态更新", "您的投递状态变更为" + req.getStatus().name(), NotificationType.APPLICATION_STATUS);
+        // 通知功能已移除
         return saved;
     }
 

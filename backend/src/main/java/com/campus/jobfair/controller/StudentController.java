@@ -187,4 +187,10 @@ public class StudentController {
                                                                       @PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.selfCheckIn(user.getUsername(), id)));
     }
+
+    @PostMapping("/me/checkin/{eventId}")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> checkinByEvent(@AuthenticationPrincipal CustomUserDetails user,
+                                                                                      @PathVariable Long eventId) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.checkinByEventId(user.getUsername(), eventId)));
+    }
 }

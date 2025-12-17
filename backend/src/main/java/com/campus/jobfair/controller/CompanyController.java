@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 public class CompanyController {
@@ -59,6 +61,20 @@ public class CompanyController {
     public ResponseEntity<ApiResponse<Company>> updateCompany(@AuthenticationPrincipal CustomUserDetails user,
                                                               @RequestBody CompanyUpdateRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(companyService.updateProfile(user.getUsername(), request)));
+    }
+
+    @PreAuthorize("hasRole('COMPANY')")
+    @PostMapping("/companies/me/logo")
+    public ResponseEntity<ApiResponse<Company>> uploadLogo(@AuthenticationPrincipal CustomUserDetails user,
+                                                           @RequestPart("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.ok("上传成功", companyService.uploadLogo(user.getUsername(), file)));
+    }
+
+    @PreAuthorize("hasRole('COMPANY')")
+    @PostMapping("/companies/me/license")
+    public ResponseEntity<ApiResponse<Company>> uploadLicense(@AuthenticationPrincipal CustomUserDetails user,
+                                                              @RequestPart("file") MultipartFile file) {
+        return ResponseEntity.ok(ApiResponse.ok("上传成功", companyService.uploadLicense(user.getUsername(), file)));
     }
 
     @PreAuthorize("hasRole('COMPANY')")

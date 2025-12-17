@@ -2,18 +2,18 @@ package com.campus.jobfair.service;
 
 import com.campus.jobfair.dto.InterviewCreateRequest;
 import com.campus.jobfair.dto.InterviewStatusUpdateRequest;
+import com.campus.jobfair.entity.ApplicationRecord;
 import com.campus.jobfair.entity.Interview;
 import com.campus.jobfair.entity.Job;
 import com.campus.jobfair.entity.Student;
+import com.campus.jobfair.entity.enums.ApplicationStatus;
 import com.campus.jobfair.entity.enums.InterviewStatus;
-import com.campus.jobfair.entity.enums.NotificationType;
-import com.campus.jobfair.entity.enums.UserRole;
+import com.campus.jobfair.repository.ApplicationRecordRepository;
 import com.campus.jobfair.repository.InterviewRepository;
 import com.campus.jobfair.repository.JobRepository;
 import com.campus.jobfair.repository.StudentRepository;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +25,16 @@ public class InterviewService {
     private final InterviewRepository interviewRepository;
     private final JobRepository jobRepository;
     private final StudentRepository studentRepository;
-    private final NotificationService notificationService;
+    private final ApplicationRecordRepository applicationRecordRepository;
 
     public InterviewService(InterviewRepository interviewRepository,
                             JobRepository jobRepository,
                             StudentRepository studentRepository,
-                            NotificationService notificationService) {
+                            ApplicationRecordRepository applicationRecordRepository) {
         this.interviewRepository = interviewRepository;
         this.jobRepository = jobRepository;
         this.studentRepository = studentRepository;
-        this.notificationService = notificationService;
+        this.applicationRecordRepository = applicationRecordRepository;
     }
 
     private Student getStudent(Long studentId) {
@@ -61,8 +61,18 @@ public class InterviewService {
         interview.setStatus(InterviewStatus.PENDING);
         Interview saved = interviewRepository.save(interview);
 
-        notificationService.send(UserRole.STUDENT, student.getId(),
-                "面试邀请", "您收到岗位" + job.getTitle() + "的面试邀请", NotificationType.INTERVIEW_INVITE);
+        // 同步更新该岗位下该学生的投递状态为面试中，便于学生端看到进度
+        applicationRecordRepository.findByStudentAndJob(student, job).ifPresent(record -> {
+            // 仅在当前状态尚未进入终态时更新
+            if (record.getStatus() != ApplicationStatus.HIRED
+                    && record.getStatus() != ApplicationStatus.REJECTED
+                    && record.getStatus() != ApplicationStatus.WITHDRAWN) {
+                record.setStatus(ApplicationStatus.INTERVIEW);
+                applicationRecordRepository.save(record);
+            }
+        });
+
+        // 通知功能已移除
         return saved;
     }
 
@@ -82,8 +92,10 @@ public class InterviewService {
     }
 
     @Transactional(readOnly = true)
-    public List<Interview> listForStudent(Long studentId) {
-        List<Interview> interviews = interviewRepository.findByStudentId(studentId);
+    public List<Interview> listForStudent(String studentUsername) {
+        Student student = studentRepository.findByStudentNo(studentUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
+        List<Interview> interviews = interviewRepository.findByStudent(student);
         // 强制加载关联对象
         for (Interview interview : interviews) {
             if (interview.getJob() != null) {
@@ -97,17 +109,22 @@ public class InterviewService {
     }
 
     @Transactional
-    public Interview updateStatusForStudent(Long interviewId, Long studentId, InterviewStatusUpdateRequest req) {
+    public Interview updateStatusForStudent(Long interviewId, String studentUsername, InterviewStatusUpdateRequest req) {
         Interview interview = interviewRepository.findById(interviewId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "面试不存在"));
-        if (!interview.getStudent().getId().equals(studentId)) {
+
+        // 根据登录学号找到学生实体，保证与面试记录关联的学生一致
+        Student student = studentRepository.findByStudentNo(studentUsername)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
+
+        if (!interview.getStudent().getId().equals(student.getId())) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "无权操作该面试");
         }
+
         interview.setStatus(req.getStatus());
         interview.setFeedback(req.getFeedback());
         Interview saved = interviewRepository.save(interview);
-        notificationService.send(UserRole.COMPANY, interview.getJob().getCompany().getId(),
-                "候选人反馈", "候选人对面试有新反馈", NotificationType.INTERVIEW_INVITE);
+        // 通知功能已移除
         return saved;
     }
 
@@ -124,8 +141,7 @@ public class InterviewService {
         interview.setLocation(req.getLocation());
         interview.setInterviewer(req.getInterviewer());
         Interview saved = interviewRepository.save(interview);
-        notificationService.send(UserRole.STUDENT, interview.getStudent().getId(),
-                "面试更新", "您的面试安排已更新", NotificationType.INTERVIEW_INVITE);
+        // 通知功能已移除
         return saved;
     }
 
@@ -138,8 +154,7 @@ public class InterviewService {
         }
         interview.setStatus(InterviewStatus.CANCELLED);
         Interview saved = interviewRepository.save(interview);
-        notificationService.send(UserRole.STUDENT, interview.getStudent().getId(),
-                "面试取消", "您的面试已被企业取消", NotificationType.INTERVIEW_INVITE);
+        // 通知功能已移除
         return saved;
     }
 }

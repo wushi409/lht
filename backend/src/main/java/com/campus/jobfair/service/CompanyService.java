@@ -2,17 +2,17 @@ package com.campus.jobfair.service;
 
 import com.campus.jobfair.dto.CompanyUpdateRequest;
 import com.campus.jobfair.entity.Company;
+import com.campus.jobfair.entity.FileResource;
 import com.campus.jobfair.entity.UserAccount;
 import com.campus.jobfair.entity.enums.CompanyStatus;
-import com.campus.jobfair.entity.enums.NotificationType;
-import com.campus.jobfair.entity.enums.UserRole;
 import com.campus.jobfair.repository.CompanyRepository;
 import com.campus.jobfair.repository.UserAccountRepository;
-import com.campus.jobfair.service.NotificationService;
+import com.campus.jobfair.service.FileStorageService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 @Service
@@ -20,12 +20,12 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final UserAccountRepository userAccountRepository;
-    private final NotificationService notificationService;
+    private final FileStorageService fileStorageService;
 
-    public CompanyService(CompanyRepository companyRepository, UserAccountRepository userAccountRepository, NotificationService notificationService) {
+    public CompanyService(CompanyRepository companyRepository, UserAccountRepository userAccountRepository, FileStorageService fileStorageService) {
         this.companyRepository = companyRepository;
         this.userAccountRepository = userAccountRepository;
-        this.notificationService = notificationService;
+        this.fileStorageService = fileStorageService;
     }
 
     public Company getById(Long id) {
@@ -71,10 +71,23 @@ public class CompanyService {
             acc.setActive(approved);
             userAccountRepository.save(acc);
         });
-        notificationService.send(UserRole.COMPANY, company.getId(),
-                approved ? "企业审核通过" : "企业审核拒绝",
-                approved ? "您的企业已通过审核" : "审核被拒绝: " + reason,
-                NotificationType.APPROVAL_RESULT);
+        // 通知功能已移除
         return company;
+    }
+
+    @Transactional
+    public Company uploadLogo(String username, MultipartFile file) {
+        Company company = getByUsername(username);
+        FileResource res = fileStorageService.store("COMPANY_LOGO", company.getId(), file);
+        company.setLogoUrl(res.getUrl());
+        return companyRepository.save(company);
+    }
+
+    @Transactional
+    public Company uploadLicense(String username, MultipartFile file) {
+        Company company = getByUsername(username);
+        FileResource res = fileStorageService.store("COMPANY_LICENSE", company.getId(), file);
+        company.setLicenseUrl(res.getUrl());
+        return companyRepository.save(company);
     }
 }

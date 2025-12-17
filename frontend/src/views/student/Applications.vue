@@ -7,7 +7,7 @@
         <el-table-column label="职位" prop="job.title" min-width="150" />
         <el-table-column label="公司" prop="job.company.name" min-width="120" />
         <el-table-column label="投递时间" min-width="120">
-          <template #default="{ row }">{{ formatDate(row.applyTime) }}</template>
+          <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
         <el-table-column label="状态" width="100">
           <template #default="{ row }">

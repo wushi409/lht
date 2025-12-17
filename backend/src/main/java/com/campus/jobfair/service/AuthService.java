@@ -1,20 +1,26 @@
 package com.campus.jobfair.service;
 
 import com.campus.jobfair.dto.AuthDtos.AuthResponse;
+import com.campus.jobfair.dto.AuthDtos.CodeLoginRequest;
 import com.campus.jobfair.dto.AuthDtos.CompanyRegisterRequest;
 import com.campus.jobfair.dto.AuthDtos.LoginRequest;
+import com.campus.jobfair.dto.AuthDtos.SendCodeRequest;
 import com.campus.jobfair.dto.AuthDtos.StudentRegisterRequest;
 import com.campus.jobfair.dto.ResetPasswordRequest;
+
 import com.campus.jobfair.entity.Company;
 import com.campus.jobfair.entity.Student;
 import com.campus.jobfair.entity.UserAccount;
 import com.campus.jobfair.entity.enums.CompanyStatus;
 import com.campus.jobfair.entity.enums.UserRole;
+import com.campus.jobfair.entity.enums.VerificationScene;
+
 import com.campus.jobfair.repository.CompanyRepository;
 import com.campus.jobfair.repository.StudentRepository;
 import com.campus.jobfair.repository.UserAccountRepository;
 import com.campus.jobfair.security.CustomUserDetails;
 import com.campus.jobfair.security.JwtService;
+
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -33,19 +39,22 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final VerificationCodeService verificationCodeService;
 
     public AuthService(UserAccountRepository userAccountRepository,
                        StudentRepository studentRepository,
                        CompanyRepository companyRepository,
                        PasswordEncoder passwordEncoder,
                        AuthenticationManager authenticationManager,
-                       JwtService jwtService) {
+                       JwtService jwtService,
+                       VerificationCodeService verificationCodeService) {
         this.userAccountRepository = userAccountRepository;
         this.studentRepository = studentRepository;
         this.companyRepository = companyRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.verificationCodeService = verificationCodeService;
     }
 
     @Transactional
@@ -110,14 +119,52 @@ public class AuthService {
         return new AuthResponse(token, principal.getRole().name());
     }
 
+    private UserAccount findAccountByPrincipal(String username) {
+        // 先按用户名查找账号（学号、统一社会信用代码、管理员账号等）
+        return userAccountRepository.findByUsername(username)
+                .orElseGet(() -> {
+                    // 再尝试按学生手机号查找
+                    Student student = studentRepository.findByPhone(username)
+                            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "账号不存在"));
+                    UserAccount account = student.getAccount();
+                    if (account == null) {
+                        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "账号不存在");
+                    }
+                    return account;
+                });
+    }
+
+    @Transactional
+    public String sendCode(SendCodeRequest req) {
+        VerificationScene scene;
+        try {
+            scene = VerificationScene.valueOf(req.getScene().toUpperCase());
+        } catch (IllegalArgumentException ex) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "不支持的验证码场景");
+        }
+        // 这里只生成验证码并记录，实际项目中应通过短信/邮件发送
+        return verificationCodeService.generate(req.getUsername(), scene);
+    }
+
+    @Transactional
+    public AuthResponse codeLogin(CodeLoginRequest req) {
+        // 校验验证码
+        verificationCodeService.validate(req.getUsername(), VerificationScene.LOGIN, req.getCode());
+
+        UserAccount account = findAccountByPrincipal(req.getUsername());
+        if (!account.isActive()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "账号未激活或已被禁用");
+        }
+        String token = jwtService.generateToken(new CustomUserDetails(account));
+        return new AuthResponse(token, account.getRole().name());
+    }
+
     @Transactional
     public void resetPassword(ResetPasswordRequest req) {
-        UserAccount account = userAccountRepository.findByUsername(req.getUsername())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "账号不存在"));
-        // 简化验证码校验：仅检查非空
-        if (req.getCode() == null || req.getCode().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "验证码无效");
-        }
+        // 校验重置密码场景验证码
+        verificationCodeService.validate(req.getUsername(), VerificationScene.RESET_PASSWORD, req.getCode());
+
+        UserAccount account = findAccountByPrincipal(req.getUsername());
         account.setPasswordHash(passwordEncoder.encode(req.getNewPassword()));
         userAccountRepository.save(account);
     }

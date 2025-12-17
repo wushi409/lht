@@ -2,7 +2,7 @@
   <div class="home-page-content">
     <!-- Banner Carousel -->
     <div class="banner-section">
-      <el-carousel trigger="click" height="420px" :interval="5000">
+      <el-carousel trigger="click" height="320px" :interval="5000">
         <el-carousel-item v-for="item in 3" :key="item">
            <div class="carousel-slide" :class="`slide-${item}`">
               <div class="container slide-content">
@@ -92,8 +92,8 @@
 
         <!-- Right Column -->
         <div class="right-col">
-          <!-- Login Box -->
-          <div class="login-card">
+          <!-- Login Box / User Info -->
+          <div class="login-card" v-if="!userStore.token">
             <h3 class="login-title">用户登录</h3>
             <div class="login-actions">
               <el-button type="primary" class="login-btn" @click="$router.push('/login')">学生登录</el-button>
@@ -101,6 +101,20 @@
             </div>
             <div class="register-links">
               还没有账号？<span class="text-primary cursor-pointer" @click="$router.push('/register/student')">立即注册</span>
+            </div>
+          </div>
+          <div class="user-card" v-else>
+            <div class="user-header">
+              <el-avatar :size="50" icon="UserFilled" />
+              <div class="user-info-box">
+                <div class="user-role">{{ roleLabel }}</div>
+                <div class="user-name">{{ userStore.userInfo?.username || '用户' }}</div>
+              </div>
+            </div>
+            <el-divider style="margin: 16px 0;" />
+            <div class="user-actions">
+              <el-button type="primary" class="action-btn" @click="goToUserCenter">进入管理</el-button>
+              <el-button class="action-btn" @click="handleLogout">退出登录</el-button>
             </div>
           </div>
 
@@ -111,8 +125,9 @@
                <el-button link size="small" @click="$router.push('/public/companies')">更多</el-button>
              </div>
              <div class="company-wall" v-loading="loadingCompanies">
-                <div v-for="company in companies" :key="company.id" class="company-logo-box" @click="showCompanyDetail(company)">
-                   {{ (company.name || '企').substring(0,2) }}
+                <div v-for="company in companies" :key="company.id" class="logo-box" @click="showCompanyDetail(company)">
+                   <img v-if="company.logoUrl" :src="getCompanyLogo(company.logoUrl)" :alt="company.name" class="logo-img" />
+                   <span v-else>{{ (company.name || '企').substring(0,2) }}</span>
                 </div>
              </div>
           </div>
@@ -146,7 +161,7 @@
       </div>
       <template #footer>
         <el-button @click="jobDialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="$router.push('/login')">登录投递</el-button>
+        <el-button type="primary" @click="handleJobAction">{{ jobActionText }}</el-button>
       </template>
     </el-dialog>
 
@@ -154,7 +169,10 @@
     <el-dialog v-model="companyDialogVisible" title="企业详情" width="550px">
       <div v-if="currentCompany">
         <div class="dialog-header">
-          <div class="dialog-logo">{{ (currentCompany.name || '企').substring(0,2) }}</div>
+          <div class="dialog-logo">
+            <img v-if="currentCompany.logoUrl" :src="getCompanyLogo(currentCompany.logoUrl)" :alt="currentCompany.name" style="width: 100%; height: 100%; object-fit: contain;" />
+            <span v-else>{{ (currentCompany.name || '企').substring(0,2) }}</span>
+          </div>
           <div>
             <h2>{{ currentCompany.name }}</h2>
             <div class="dialog-tags">
@@ -177,7 +195,7 @@
       </div>
       <template #footer>
         <el-button @click="companyDialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="$router.push('/login')">登录查看职位</el-button>
+        <el-button type="primary" @click="handleCompanyAction">{{ companyActionText }}</el-button>
       </template>
     </el-dialog>
 
@@ -185,11 +203,34 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import request from '@/api/request'
 
-
+const router = useRouter()
+const userStore = useUserStore()
 const activeJobTab = ref('hot')
+
+const roleLabel = computed(() => {
+  const map = { STUDENT: '学生', COMPANY: '企业', ADMIN: '管理员' }
+  return map[userStore.role] || '用户'
+})
+
+const goToUserCenter = () => {
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/profile')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  }
+}
+
+const handleLogout = () => {
+  userStore.logout()
+  router.push('/')
+}
 const stats = ref({})
 const hotJobs = ref([])
 const companies = ref([])
@@ -223,6 +264,54 @@ const formatDateTime = (date) => {
   return new Date(date).toISOString().split('T')[0]
 }
 const formatDate = formatDateTime
+
+const getCompanyLogo = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http')) return url
+  return '/api' + url
+}
+
+const jobActionText = computed(() => {
+  return userStore.token ? '查看详情' : '登录投递'
+})
+
+const companyActionText = computed(() => {
+  return userStore.token ? '查看职位' : '登录查看职位'
+})
+
+const handleJobAction = () => {
+  if (!userStore.token) {
+    router.push('/login')
+    return
+  }
+  
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/jobs')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  } else {
+    router.push('/login')
+  }
+}
+
+const handleCompanyAction = () => {
+  if (!userStore.token) {
+    router.push('/login')
+    return
+  }
+  
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/jobs')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  } else {
+    router.push('/login')
+  }
+}
 
 const fetchData = async () => {
   try {
@@ -290,38 +379,39 @@ onMounted(() => {
   display: flex;
   align-items: center;
 }
-.slide-1 { background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%); }
-.slide-2 { background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%); }
-.slide-3 { background-image: linear-gradient(120deg, #84fab0 0%, #8fd3f4 100%); }
+.slide-1 { background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.slide-2 { background-image: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.slide-3 { background-image: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
 .slide-content { z-index: 2; position: relative; }
 .slide-text h2 {
-  font-size: 48px;
-  color: #1e3a8a;
-  margin-bottom: 20px;
+  font-size: 36px;
+  color: white;
+  margin-bottom: 16px;
   font-weight: 800;
-  text-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.3);
 }
 .slide-text p {
-  font-size: 20px;
-  color: #333;
-  margin-bottom: 30px;
+  font-size: 16px;
+  color: rgba(255,255,255,0.95);
+  margin-bottom: 20px;
+  text-shadow: 0 1px 10px rgba(0,0,0,0.2);
 }
 .slide-btn { padding: 12px 36px; font-weight: 600; }
 
 .stats-overlay-container {
   position: relative;
   height: 0;
-  z-index: 10;
+  z-index: 1;
 }
 .stats-bar {
   position: absolute;
-  top: -60px;
-  right: 0;
+  top: -50px;
+  left: 0;
   background: white;
-  padding: 20px 40px;
+  padding: 16px 32px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  border-radius: 4px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
 }
@@ -332,7 +422,7 @@ onMounted(() => {
 .stat-num {
   font-size: 28px;
   font-weight: 700;
-  color: #f56c6c;
+  color: #1e40af;
 }
 .stat-name {
   font-size: 14px;
@@ -538,9 +628,9 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 10px;
 }
-.company-logo-box {
+.company-wall .logo-box {
   width: calc(33.33% - 7px);
-  aspect-ratio: 1;
+  height: 70px;
   background: #f4f6f8;
   display: flex;
   align-items: center;
@@ -551,11 +641,19 @@ onMounted(() => {
   border: 1px solid #eee;
   cursor: pointer;
   transition: all 0.2s;
+  overflow: hidden;
 }
-.company-logo-box:hover {
+.company-wall .logo-box:hover {
   background: #e8f4ff;
   color: #1e40af;
   border-color: #1e40af;
+}
+.company-wall .logo-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
 }
 
 /* Dialog Styles */
@@ -569,3 +667,65 @@ onMounted(() => {
 .dialog-section h4 { margin: 0 0 8px; font-size: 14px; color: #374151; }
 .dialog-section p { margin: 0 0 4px; color: #6b7280; line-height: 1.6; white-space: pre-wrap; }
 </style>
+
+
+
+.company-logo-box {
+  width: calc(33.33% - 7px) !important;
+  height: 80px !important;
+  aspect-ratio: auto !important;
+}
+
+/* User Card */
+.user-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  color: white;
+}
+.user-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.user-info-box {
+  flex: 1;
+}
+.user-role {
+  font-size: 12px;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+.user-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+.user-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+:deep(.user-actions .action-btn) {
+  width: 100%;
+  background: white;
+  color: #667eea;
+  border: none;
+  font-weight: 600;
+}
+:deep(.user-actions .action-btn:hover) {
+  background: rgba(255,255,255,0.9);
+  color: #764ba2;
+}
+:deep(.user-actions .action-btn.el-button--default) {
+  background: rgba(255,255,255,0.2);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+:deep(.user-actions .action-btn.el-button--default:hover) {
+  background: rgba(255,255,255,0.3);
+}

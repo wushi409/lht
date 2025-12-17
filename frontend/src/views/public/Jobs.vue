@@ -113,7 +113,7 @@
       </div>
       <template #footer>
         <el-button @click="dialogVisible = false">关闭</el-button>
-        <el-button type="primary" @click="$router.push('/login')">登录投递</el-button>
+        <el-button type="primary" @click="handleApply">{{ applyButtonText }}</el-button>
       </template>
     </el-dialog>
   </div>
@@ -121,11 +121,14 @@
 
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 import request from '@/api/request'
 import { Location, Reading, User } from '@element-plus/icons-vue'
 
 const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
 
 // 筛选选项
 const jobTypes = [
@@ -221,6 +224,28 @@ const showDetail = (job) => {
 const formatDate = (date) => {
   if (!date) return ''
   return new Date(date).toISOString().split('T')[0]
+}
+
+const applyButtonText = computed(() => {
+  return userStore.token ? '查看详情' : '登录投递'
+})
+
+const handleApply = () => {
+  if (!userStore.token) {
+    router.push('/login')
+    return
+  }
+  
+  // 根据角色跳转
+  if (userStore.role === 'STUDENT') {
+    router.push('/student/jobs')
+  } else if (userStore.role === 'COMPANY') {
+    router.push('/company/jobs')
+  } else if (userStore.role === 'ADMIN') {
+    router.push('/admin/stats')
+  } else {
+    router.push('/login')
+  }
 }
 
 onMounted(() => {

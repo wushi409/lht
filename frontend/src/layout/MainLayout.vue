@@ -48,10 +48,6 @@
             <el-icon><Notification /></el-icon>
             <template #title>系统公告</template>
           </el-menu-item>
-          <el-menu-item index="/student/notifications">
-            <el-icon><Bell /></el-icon>
-            <template #title>消息通知</template>
-          </el-menu-item>
         </template>
 
         <!-- 企业菜单 -->
@@ -76,10 +72,6 @@
             <el-icon><Notification /></el-icon>
             <template #title>系统公告</template>
           </el-menu-item>
-          <el-menu-item index="/company/notifications">
-            <el-icon><Bell /></el-icon>
-            <template #title>消息通知</template>
-          </el-menu-item>
         </template>
 
         <!-- 管理员菜单 -->
@@ -87,6 +79,10 @@
           <el-menu-item index="/admin/stats">
             <el-icon><DataLine /></el-icon>
             <template #title>数据统计</template>
+          </el-menu-item>
+          <el-menu-item index="/admin/fairs">
+            <el-icon><Calendar /></el-icon>
+            <template #title>双选会管理</template>
           </el-menu-item>
           <el-menu-item index="/admin/companies">
             <el-icon><School /></el-icon>
@@ -100,6 +96,10 @@
             <el-icon><Checked /></el-icon>
             <template #title>活动签到</template>
           </el-menu-item>
+          <el-menu-item index="/admin/scan-checkin">
+            <el-icon><Checked /></el-icon>
+            <template #title>扫码签到</template>
+          </el-menu-item>
           <el-menu-item index="/admin/announcements">
             <el-icon><Notification /></el-icon>
             <template #title>公告管理</template>
@@ -107,14 +107,6 @@
           <el-menu-item index="/admin/export">
             <el-icon><Download /></el-icon>
             <template #title>数据导出</template>
-          </el-menu-item>
-          <el-menu-item index="/admin/audit-logs">
-            <el-icon><List /></el-icon>
-            <template #title>审计日志</template>
-          </el-menu-item>
-          <el-menu-item index="/admin/notifications">
-            <el-icon><Bell /></el-icon>
-            <template #title>消息通知</template>
           </el-menu-item>
         </template>
       </el-menu>

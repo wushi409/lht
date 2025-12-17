@@ -10,6 +10,12 @@ const routes = [
     meta: { public: true }
   },
   {
+    path: '/reset-password',
+    name: 'ResetPassword',
+    component: () => import('@/views/auth/ResetPassword.vue'),
+    meta: { public: true }
+  },
+  {
     path: '/register/student',
     name: 'RegisterStudent',
     component: () => import('@/views/auth/RegisterStudent.vue'),
@@ -19,6 +25,14 @@ const routes = [
     path: '/register/company',
     name: 'RegisterCompany',
     component: () => import('@/views/auth/RegisterCompany.vue'),
+    meta: { public: true }
+  },
+
+  // 学生扫码签到（公开页面）
+  {
+    path: '/student-checkin',
+    name: 'StudentCheckin',
+    component: () => import('@/views/student/Checkin.vue'),
     meta: { public: true }
   },
 
@@ -36,7 +50,6 @@ const routes = [
       { path: 'resumes', name: 'StudentResumes', component: () => import('@/views/student/Resumes.vue') },
       { path: 'interviews', name: 'StudentInterviews', component: () => import('@/views/student/Interviews.vue') },
       { path: 'events', name: 'StudentEvents', component: () => import('@/views/student/Events.vue') },
-      { path: 'notifications', name: 'StudentNotifications', component: () => import('@/views/common/Notifications.vue') },
       { path: 'announcements', name: 'StudentAnnouncements', component: () => import('@/views/common/Announcements.vue') }
     ]
   },
@@ -52,7 +65,6 @@ const routes = [
       { path: 'jobs', name: 'CompanyJobs', component: () => import('@/views/company/Jobs.vue') },
       { path: 'applications', name: 'CompanyApplications', component: () => import('@/views/company/Applications.vue') },
       { path: 'interviews', name: 'CompanyInterviews', component: () => import('@/views/company/Interviews.vue') },
-      { path: 'notifications', name: 'CompanyNotifications', component: () => import('@/views/common/Notifications.vue') },
       { path: 'announcements', name: 'CompanyAnnouncements', component: () => import('@/views/common/Announcements.vue') }
     ]
   },
@@ -65,13 +77,13 @@ const routes = [
     meta: { role: 'ADMIN' },
     children: [
       { path: 'stats', name: 'AdminStats', component: () => import('@/views/admin/Stats.vue') },
+      { path: 'fairs', name: 'AdminFairs', component: () => import('@/views/admin/Fairs.vue') },
       { path: 'companies', name: 'AdminCompanies', component: () => import('@/views/admin/CompanyAudit.vue') },
       { path: 'booths', name: 'AdminBooths', component: () => import('@/views/admin/Booths.vue') },
       { path: 'checkin', name: 'AdminCheckin', component: () => import('@/views/admin/Checkin.vue') },
+      { path: 'scan-checkin', name: 'AdminScanCheckin', component: () => import('@/views/admin/ScanCheckin.vue') },
       { path: 'announcements', name: 'AdminAnnouncements', component: () => import('@/views/admin/Announcements.vue') },
-      { path: 'export', name: 'AdminExport', component: () => import('@/views/admin/Export.vue') },
-      { path: 'audit-logs', name: 'AdminAuditLogs', component: () => import('@/views/admin/AuditLogs.vue') },
-      { path: 'notifications', name: 'AdminNotifications', component: () => import('@/views/common/Notifications.vue') }
+      { path: 'export', name: 'AdminExport', component: () => import('@/views/admin/Export.vue') }
     ]
   },
 

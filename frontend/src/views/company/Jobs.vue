@@ -20,12 +20,18 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <span class="action-link" @click="openEdit(row)">编辑</span>
+            <el-button type="primary" link size="small" @click="openEdit(row)">
+              <el-icon><edit /></el-icon> 编辑
+            </el-button>
             <el-divider direction="vertical" />
-            <span v-if="row.status === 'PUBLISHED'" class="action-link warning" @click="changeStatus(row, 'CLOSED')">关闭</span>
-            <span v-else class="action-link success" @click="changeStatus(row, 'PUBLISHED')">开启</span>
+            <el-button v-if="row.status === 'PUBLISHED'" type="warning" link size="small" @click="changeStatus(row, 'CLOSED')">
+              <el-icon><lock /></el-icon> 关闭
+            </el-button>
+            <el-button v-else type="success" link size="small" @click="changeStatus(row, 'PUBLISHED')">
+              <el-icon><unlock /></el-icon> 开启
+            </el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -95,6 +101,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { companyApi } from '@/api/company'
 import request from '@/api/request'
 import { ElMessage } from 'element-plus'
+import { Edit, Lock, Unlock } from '@element-plus/icons-vue'
 
 const jobs = ref([])
 const loading = ref(false)

@@ -10,4 +10,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByCreditCode(String creditCode);
     boolean existsByCreditCode(String creditCode);
     List<Company> findByStatus(CompanyStatus status);
+
+    Optional<Company> findByContactPhone(String contactPhone);
 }

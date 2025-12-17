@@ -28,6 +28,25 @@ public class AuthDtos {
     }
 
     @Data
+    public static class CodeLoginRequest {
+        @NotBlank
+        private String username;
+        @NotBlank
+        private String code;
+    }
+
+    @Data
+    public static class SendCodeRequest {
+        @NotBlank
+        private String username;
+        /**
+         * 使用场景，例如 LOGIN 或 RESET_PASSWORD
+         */
+        @NotBlank
+        private String scene;
+    }
+
+    @Data
     public static class CompanyRegisterRequest {
         @NotBlank
         private String name;

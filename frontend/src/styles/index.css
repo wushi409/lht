@@ -174,26 +174,80 @@ body {
   opacity: 0;
 }
 
-/* 表格操作链接样式 */
+/* 表格操作按钮样式 */
 .action-link {
   color: var(--primary-color);
   cursor: pointer;
-  font-size: 13px;
-  transition: opacity 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  display: inline-block;
 }
 .action-link:hover {
-  opacity: 0.7;
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--primary-hover);
 }
 .action-link.primary {
   color: var(--primary-color);
 }
+.action-link.primary:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
 .action-link.success {
   color: var(--success-color);
+}
+.action-link.success:hover {
+  background-color: rgba(16, 185, 129, 0.1);
 }
 .action-link.warning {
   color: var(--warning-color);
 }
+.action-link.warning:hover {
+  background-color: rgba(245, 158, 11, 0.1);
+}
 .action-link.danger {
   color: var(--danger-color);
+}
+.action-link.danger:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* 表格操作列样式优化 */
+.el-table .cell .action-link + .el-divider--vertical {
+  margin: 0 8px;
+  height: 14px;
+  background-color: var(--border-color);
+}
+
+/* 卡片头部样式 */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 按钮组样式 */
+.btn-group {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* 小尺寸按钮优化 */
+.el-button--small {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+}
+
+/* 文本按钮优化 */
+.el-button.is-text {
+  padding: 4px 8px;
+  font-weight: 500;
+}
+
+.el-button.is-text:hover {
+  background-color: rgba(59, 130, 246, 0.1);
 }
 
