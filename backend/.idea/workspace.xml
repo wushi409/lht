@@ -4,41 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/schema-mysql.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema-mysql.sql" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/BoothController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/BoothController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/CompanyController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/CompanyController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StudentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/StudentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/dto/ApplicationStatusUpdateRequest.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/dto/ApplicationStatusUpdateRequest.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/ApplicationRecord.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/ApplicationRecord.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Job.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/Job.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/JobFairEvent.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/JobFairEvent.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/enums/JobStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/entity/enums/JobStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ApplicationService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ApplicationService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/BoothService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/BoothService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/CompanyService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/CompanyService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/BoothController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/BoothController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/CompanyController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/CompanyController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/EventController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/EventController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/StudentController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/StudentController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/dto/ApplicationStatusUpdateRequest.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/dto/ApplicationStatusUpdateRequest.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/ApplicationRecord.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/ApplicationRecord.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/Job.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/Job.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/JobFairEvent.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/JobFairEvent.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/enums/JobStatus.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/entity/enums/JobStatus.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/ApplicationService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/ApplicationService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/BoothService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/BoothService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/CompanyService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/CompanyService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/EventService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/EventService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/router/index.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/views/admin/CompanyAudit.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/admin/CompanyAudit.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/views/company/Applications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/company/Applications.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/views/student/Applications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/student/Applications.vue" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../frontend/src/views/student/Events.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/student/Events.vue" afterDir="false" />
-    </list>
+    <list default="true" id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -105,7 +71,7 @@
       <workItem from="1765864301831" duration="16125000" />
       <workItem from="1765888267908" duration="5901000" />
       <workItem from="1765937793228" duration="12971000" />
-      <workItem from="1765970995675" duration="6960000" />
+      <workItem from="1765970995675" duration="7240000" />
     </task>
     <servers />
   </component>
