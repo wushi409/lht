@@ -119,6 +119,12 @@ public class CompanyController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/companies")
+    public ResponseEntity<ApiResponse<List<Company>>> listAll() {
+        return ResponseEntity.ok(ApiResponse.ok(companyService.listAll()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/admin/companies/{id}/approve")
     public ResponseEntity<ApiResponse<Company>> review(@PathVariable Long id,
                                                        @RequestParam(defaultValue = "true") boolean approved,

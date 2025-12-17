@@ -8,8 +8,8 @@
       </div>
       
       <el-form ref="formRef" :model="form" :rules="rules" label-position="top">
-        <el-form-item label="用户名" prop="username">
-          <el-input v-model="form.username" placeholder="登录用户名" />
+        <el-form-item label="统一社会信用代码" prop="creditCode">
+          <el-input v-model="form.creditCode" placeholder="18位统一社会信用代码（用于登录）" maxlength="18" />
         </el-form-item>
         <el-form-item label="密码" prop="password">
           <el-input v-model="form.password" type="password" placeholder="登录密码" show-password />
@@ -72,12 +72,15 @@ const formRef = ref()
 const loading = ref(false)
 
 const form = reactive({
-  username: '', password: '', name: '', industry: '', scale: '',
+  creditCode: '', password: '', name: '', industry: '', scale: '',
   contactName: '', contactPhone: '', contactEmail: '', description: ''
 })
 
 const rules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  creditCode: [
+    { required: true, message: '请输入统一社会信用代码', trigger: 'blur' },
+    { len: 18, message: '统一社会信用代码为18位', trigger: 'blur' }
+  ],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '密码至少6位', trigger: 'blur' }],
   name: [{ required: true, message: '请输入企业名称', trigger: 'blur' }],
   industry: [{ required: true, message: '请选择行业', trigger: 'change' }],

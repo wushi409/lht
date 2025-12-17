@@ -74,11 +74,27 @@ public class EventService {
     }
 
     public List<JobFairEvent> listEventsByFair(Long fairId) {
-        return jobFairEventRepository.findByJobFairId(fairId);
+        List<JobFairEvent> events = jobFairEventRepository.findByJobFairId(fairId);
+        // 自动为没有签到码的活动生成签到码
+        for (JobFairEvent event : events) {
+            if (event.getCheckinCode() == null || event.getCheckinCode().isEmpty()) {
+                event.setCheckinCode(generateEventCheckinCode());
+                jobFairEventRepository.save(event);
+            }
+        }
+        return events;
     }
 
     public List<JobFairEvent> listAllEvents() {
-        return jobFairEventRepository.findAll();
+        List<JobFairEvent> events = jobFairEventRepository.findAll();
+        // 自动为没有签到码的活动生成签到码
+        for (JobFairEvent event : events) {
+            if (event.getCheckinCode() == null || event.getCheckinCode().isEmpty()) {
+                event.setCheckinCode(generateEventCheckinCode());
+                jobFairEventRepository.save(event);
+            }
+        }
+        return events;
     }
 
     @Transactional
@@ -94,7 +110,16 @@ public class EventService {
         event.setDescription(req.getDescription());
         event.setStartTime(parseInstant(req.getStartTime()));
         event.setEndTime(parseInstant(req.getEndTime()));
+        
+        // 生成8位活动签到码
+        event.setCheckinCode(generateEventCheckinCode());
+        
         return jobFairEventRepository.save(event);
+    }
+
+    private String generateEventCheckinCode() {
+        // 生成8位随机数字签到码
+        return String.format("%08d", (int)(Math.random() * 100000000));
     }
 
     @Transactional
@@ -124,8 +149,13 @@ public class EventService {
         JobFairEvent event = jobFairEventRepository.findById(req.getEventId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在"));
 
+        // 检查是否已有有效报名（未取消的报名）
         eventRegistrationRepository.findByEventAndStudent(event, student).ifPresent(r -> {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已报名该活动");
+            if (r.getStatus() != RegistrationStatus.CANCELLED) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "已报名该活动");
+            }
+            // 如果是已取消的报名，删除旧记录，允许重新报名
+            eventRegistrationRepository.delete(r);
         });
 
         if (event.getCapacity() != null) {
@@ -153,7 +183,7 @@ public class EventService {
     }
 
     @Transactional
-    public EventRegistration selfCheckIn(String studentUsername, Long registrationId) {
+    public EventRegistration selfCheckIn(String studentUsername, Long registrationId, String checkinCode) {
         Student student = studentRepository.findByStudentNo(studentUsername)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "学生不存在"));
         EventRegistration registration = eventRegistrationRepository.findById(registrationId)
@@ -167,6 +197,13 @@ public class EventService {
         if (registration.getStatus() == RegistrationStatus.CANCELLED) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "报名已取消");
         }
+        
+        // 验证签到码
+        JobFairEvent event = registration.getEvent();
+        if (event.getCheckinCode() == null || !event.getCheckinCode().equals(checkinCode)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "签到码错误");
+        }
+        
         registration.setStatus(RegistrationStatus.CHECKED_IN);
         registration.setCheckinTime(Instant.now());
         return eventRegistrationRepository.save(registration);
@@ -188,6 +225,23 @@ public class EventService {
         List<EventRegistration> registrations = eventRegistrationRepository.findByStudent(student);
         // 强制加载关联对象
         for (EventRegistration reg : registrations) {
+            if (reg.getEvent() != null) {
+                reg.getEvent().getName();
+            }
+        }
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<EventRegistration> listAllRegistrations() {
+        List<EventRegistration> registrations = eventRegistrationRepository.findAll();
+        // 强制加载关联对象
+        for (EventRegistration reg : registrations) {
+            if (reg.getStudent() != null) {
+                reg.getStudent().getName();
+                reg.getStudent().getStudentNo();
+                reg.getStudent().getCollege();
+            }
             if (reg.getEvent() != null) {
                 reg.getEvent().getName();
             }
@@ -254,4 +308,45 @@ public class EventService {
         result.put("checkinTime", registration.getCheckinTime());
         return result;
     }
+
+    @Transactional
+    public java.util.Map<String, Object> adminCheckIn(Long eventId, Long registrationId) {
+        JobFairEvent event = jobFairEventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在"));
+        
+        EventRegistration registration = eventRegistrationRepository.findById(registrationId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "报名记录不存在"));
+        
+        // 验证报名是否属于该活动
+        if (!registration.getEvent().getId().equals(eventId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "签到码与活动不匹配");
+        }
+        
+        if (registration.getStatus() == RegistrationStatus.CHECKED_IN) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "该学生已签到");
+        }
+        
+        if (registration.getStatus() == RegistrationStatus.CANCELLED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "报名已取消");
+        }
+        
+        registration.setStatus(RegistrationStatus.CHECKED_IN);
+        registration.setCheckinTime(Instant.now());
+        eventRegistrationRepository.save(registration);
+        
+        // 强制加载关联对象
+        Student student = registration.getStudent();
+        if (student != null) {
+            student.getName();
+            student.getStudentNo();
+            student.getCollege();
+        }
+        
+        java.util.Map<String, Object> result = new java.util.HashMap<>();
+        result.put("studentName", student != null ? student.getName() : "未知");
+        result.put("checkinTime", registration.getCheckinTime());
+        result.put("student", student);
+        return result;
+    }
+
 }

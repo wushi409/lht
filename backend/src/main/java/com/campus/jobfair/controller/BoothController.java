@@ -31,14 +31,27 @@ public class BoothController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/booths")
+    public ResponseEntity<ApiResponse<List<Booth>>> listAll() {
+        return ResponseEntity.ok(ApiResponse.ok(boothService.listAll()));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/booths")
     public ResponseEntity<ApiResponse<Booth>> create(@Valid @RequestBody BoothRequest request) {
         return ResponseEntity.ok(ApiResponse.ok(boothService.create(request)));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/booths/{id}/checkin")
-    public ResponseEntity<ApiResponse<Booth>> checkin(@PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(boothService.checkIn(id)));
+    @org.springframework.web.bind.annotation.PutMapping("/booths/{id}")
+    public ResponseEntity<ApiResponse<Booth>> update(@PathVariable Long id, @Valid @RequestBody BoothRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(boothService.update(id, request)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.web.bind.annotation.DeleteMapping("/booths/{id}")
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
+        boothService.delete(id);
+        return ResponseEntity.ok(ApiResponse.ok("删除成功", null));
     }
 }

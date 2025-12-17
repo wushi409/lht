@@ -104,8 +104,19 @@ public class ApplicationService {
     public ApplicationRecord updateStatus(Long applicationId, ApplicationStatusUpdateRequest req) {
         ApplicationRecord record = applicationRecordRepository.findById(applicationId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "投递不存在"));
-        record.setStatus(req.getStatus());
-        record.setNotes(req.getNotes());
+        
+        // 只更新提供的字段
+        if (req.getStatus() != null) {
+            record.setStatus(req.getStatus());
+        }
+        if (req.getNotes() != null) {
+            record.setNotes(req.getNotes());
+        }
+        if (req.getTag() != null || "".equals(req.getTag())) {
+            // 允许设置为空字符串来清除标记
+            record.setTag("".equals(req.getTag()) ? null : req.getTag());
+        }
+        
         ApplicationRecord saved = applicationRecordRepository.save(record);
         // 通知功能已移除
         return saved;

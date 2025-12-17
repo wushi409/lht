@@ -41,4 +41,7 @@ public class ApplicationRecord extends BaseEntity {
     private String notes;
 
     private Instant withdrawnAt;
+
+    @Column(length = 50)
+    private String tag; // 企业标记：INTERESTED(感兴趣), PENDING(待定), NOT_SUITABLE(不合适)
 }

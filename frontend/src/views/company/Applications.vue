@@ -19,11 +19,33 @@
             <el-tag :type="statusType(row.status)">{{ statusText(row.status) }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="标记" width="100">
+          <template #default="{ row }">
+            <el-tag v-if="row.tag" :type="tagType(row.tag)" size="small">
+              {{ tagText(row.tag) }}
+            </el-tag>
+            <span v-else style="color: #9ca3af;">-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link size="small" @click="viewResume(row)">
               查看简历
             </el-button>
+            <el-divider direction="vertical" />
+            <el-dropdown trigger="click" @command="(cmd) => handleTag(row, cmd)">
+              <el-button link size="small">
+                <el-icon><price-tag /></el-icon> 标记
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="INTERESTED">⭐ 感兴趣</el-dropdown-item>
+                  <el-dropdown-item command="PENDING">⏳ 待定</el-dropdown-item>
+                  <el-dropdown-item command="NOT_SUITABLE">❌ 不合适</el-dropdown-item>
+                  <el-dropdown-item command="" divided>清除标记</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
             <template v-if="row.status !== 'HIRED' && row.status !== 'REJECTED' && row.status !== 'WITHDRAWN'">
               <el-divider direction="vertical" />
               <el-dropdown trigger="click" @command="(cmd) => handleAction(row, cmd)">
@@ -105,7 +127,7 @@ import { ref, onMounted } from 'vue'
 import { companyApi } from '@/api/company'
 import request from '@/api/request'
 import { ElMessage } from 'element-plus'
-import { ArrowDown, Calendar, Check, Close } from '@element-plus/icons-vue'
+import { ArrowDown, Calendar, Check, Close, PriceTag } from '@element-plus/icons-vue'
 
 const applications = ref([])
 const loading = ref(false)
@@ -225,13 +247,42 @@ const confirmInterview = async () => {
 const formatDate = (date) => date ? new Date(date).toLocaleDateString('zh-CN') : ''
 
 const statusText = (status) => {
-  const map = { PENDING: '待处理', SUBMITTED: '已投递', VIEWED: '已查看', INTERVIEW: '面试中', ACCEPTED: '已录用', HIRED: '已录用', REJECTED: '已拒绝', WITHDRAWN: '已撤回' }
+  const map = { PENDING: '待处理', SUBMITTED: '已投递', VIEWED: '已查看', INTERVIEW: '待面试', ACCEPTED: '已录用', HIRED: '已录用', REJECTED: '已拒绝', WITHDRAWN: '已撤回' }
   return map[status] || status
 }
 
 const statusType = (status) => {
   const map = { PENDING: 'info', SUBMITTED: 'info', VIEWED: '', INTERVIEW: 'warning', ACCEPTED: 'success', HIRED: 'success', REJECTED: 'danger', WITHDRAWN: 'info' }
   return map[status] || ''
+}
+
+const handleTag = async (row, tag) => {
+  try {
+    await companyApi.updateApplicationStatus(row.id, { tag: tag || null })
+    row.tag = tag || null
+    ElMessage.success(tag ? '标记成功' : '已清除标记')
+  } catch (e) {
+    console.error(e)
+    ElMessage.error('操作失败')
+  }
+}
+
+const tagText = (tag) => {
+  const map = {
+    'INTERESTED': '感兴趣',
+    'PENDING': '待定',
+    'NOT_SUITABLE': '不合适'
+  }
+  return map[tag] || tag
+}
+
+const tagType = (tag) => {
+  const map = {
+    'INTERESTED': 'success',
+    'PENDING': 'warning',
+    'NOT_SUITABLE': 'info'
+  }
+  return map[tag] || ''
 }
 
 onMounted(fetchApplications)

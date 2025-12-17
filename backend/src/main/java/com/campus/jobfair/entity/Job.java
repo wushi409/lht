@@ -42,7 +42,7 @@ public class Job extends BaseEntity {
     private String jobType;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 20)
+    @Column(nullable = false, length = 30)
     private JobStatus status = JobStatus.PUBLISHED;
 
     private Instant publishAt;

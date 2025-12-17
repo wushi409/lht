@@ -28,14 +28,6 @@ const routes = [
     meta: { public: true }
   },
 
-  // 学生扫码签到（公开页面）
-  {
-    path: '/student-checkin',
-    name: 'StudentCheckin',
-    component: () => import('@/views/student/Checkin.vue'),
-    meta: { public: true }
-  },
-
   // 学生端
   {
     path: '/student',

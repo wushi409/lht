@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   skills VARCHAR(200),
   location VARCHAR(100),
   job_type VARCHAR(100),
-  status VARCHAR(20) NOT NULL DEFAULT 'PUBLISHED',
+  status VARCHAR(30) NOT NULL DEFAULT 'PUBLISHED',
   publish_at DATETIME(6),
   deadline DATETIME(6),
   company_id BIGINT,
@@ -103,6 +103,7 @@ CREATE TABLE IF NOT EXISTS job_fair_events (
   end_time DATETIME(6),
   capacity INT,
   description VARCHAR(300),
+  checkin_code VARCHAR(8),
   KEY idx_event_jobfair (job_fair_id),
   CONSTRAINT fk_event_jobfair FOREIGN KEY (job_fair_id) REFERENCES job_fairs(id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -160,6 +161,7 @@ CREATE TABLE IF NOT EXISTS applications (
   status VARCHAR(30) NOT NULL DEFAULT 'SUBMITTED',
   notes VARCHAR(500),
   withdrawn_at DATETIME(6),
+  tag VARCHAR(50),
   KEY idx_app_job (job_id),
   KEY idx_app_student (student_id),
   KEY idx_app_resume (resume_id),
@@ -307,8 +309,8 @@ ALTER TABLE students
   ON DELETE SET NULL;
 
 INSERT INTO companies (name, credit_code, scale, industry, description, logo_url, contact_name, contact_phone, contact_email, status) VALUES
-('演示科技（SQL）有限公司','CRED-010','200-500人','互联网','SQL 脚本插入的示例企业',NULL,'HR','13800000000','hr@example.com','APPROVED'),
-('未来信息技术有限公司','CRED-002','50-200人','软件','专注校园招聘与培养',NULL,'王敏','13900000000','hr2@example.com','APPROVED');
+('演示科技（SQL）有限公司','91310000MA1K12345X','200-500人','互联网','SQL 脚本插入的示例企业',NULL,'HR','13800000000','hr@example.com','APPROVED'),
+('未来信息技术有限公司','91310000MA1K67890Y','50-200人','软件','专注校园招聘与培养',NULL,'王敏','13900000000','hr2@example.com','APPROVED');
 
 INSERT INTO students (student_no, name, college, phone, email, default_resume_id) VALUES
 ('20259999','示例同学SQL','计算机学院','13800000001','student@example.com',NULL),
@@ -335,8 +337,8 @@ SET s.default_resume_id = r.id
 WHERE s.student_no = '20259999';
 
 INSERT INTO jobs (company_id, title, description, salary_range, headcount, skills, location, job_type, status, publish_at, deadline) VALUES
-((SELECT id FROM companies WHERE credit_code='CRED-010'),'Java后端实习生','参与后台开发与接口联调，熟悉Spring Boot','8k-12k',5,'Java,Spring,MySQL','上海','实习','PUBLISHED',NOW(6),DATE_ADD(NOW(6), INTERVAL 30 DAY)),
-((SELECT id FROM companies WHERE credit_code='CRED-010'),'前端工程师（校招）','负责前端页面开发与组件封装','10k-15k',3,'Vue,TypeScript,Element Plus','上海','全职','PUBLISHED',NOW(6),DATE_ADD(NOW(6), INTERVAL 60 DAY));
+((SELECT id FROM companies WHERE credit_code='91310000MA1K12345X'),'Java后端实习生','参与后台开发与接口联调，熟悉Spring Boot','8k-12k',5,'Java,Spring,MySQL','上海','实习','PUBLISHED',NOW(6),DATE_ADD(NOW(6), INTERVAL 30 DAY)),
+((SELECT id FROM companies WHERE credit_code='91310000MA1K12345X'),'前端工程师（校招）','负责前端页面开发与组件封装','10k-15k',3,'Vue,TypeScript,Element Plus','上海','全职','PUBLISHED',NOW(6),DATE_ADD(NOW(6), INTERVAL 60 DAY));
 
 INSERT INTO job_fair_events (job_fair_id, name, type, location, start_time, end_time, capacity, description) VALUES
 ((SELECT id FROM job_fairs WHERE name='2025春季校园双选会'),'企业宣讲会','PRESENTATION','报告厅A','2025-03-20 10:00:00','2025-03-20 12:00:00',300,'示例科技宣讲'),
@@ -344,7 +346,7 @@ INSERT INTO job_fair_events (job_fair_id, name, type, location, start_time, end_
 
 INSERT INTO applications (job_id, student_id, resume_id, status, notes) VALUES
 (
-  (SELECT id FROM jobs WHERE title='Java后端实习生' AND company_id=(SELECT id FROM companies WHERE credit_code='CRED-010') ORDER BY id LIMIT 1),
+  (SELECT id FROM jobs WHERE title='Java后端实习生' AND company_id=(SELECT id FROM companies WHERE credit_code='91310000MA1K12345X') ORDER BY id LIMIT 1),
   (SELECT id FROM students WHERE student_no='20259999'),
   (SELECT id FROM resumes WHERE student_id=(SELECT id FROM students WHERE student_no='20259999') ORDER BY id LIMIT 1),
   'SUBMITTED',
@@ -352,11 +354,11 @@ INSERT INTO applications (job_id, student_id, resume_id, status, notes) VALUES
 );
 
 INSERT INTO favorite_companies (student_id, company_id) VALUES
-((SELECT id FROM students WHERE student_no='20259999'),(SELECT id FROM companies WHERE credit_code='CRED-010'));
+((SELECT id FROM students WHERE student_no='20259999'),(SELECT id FROM companies WHERE credit_code='91310000MA1K12345X'));
 
 INSERT INTO favorite_jobs (student_id, job_id, job_status_snapshot) VALUES
 ((SELECT id FROM students WHERE student_no='20259999'),
- (SELECT id FROM jobs WHERE title='前端工程师（校招）' AND company_id=(SELECT id FROM companies WHERE credit_code='CRED-010') ORDER BY id LIMIT 1),
+ (SELECT id FROM jobs WHERE title='前端工程师（校招）' AND company_id=(SELECT id FROM companies WHERE credit_code='91310000MA1K12345X') ORDER BY id LIMIT 1),
  'PUBLISHED');
 
 INSERT INTO event_registrations (event_id, student_id, status, seat_no) VALUES
@@ -365,13 +367,13 @@ INSERT INTO event_registrations (event_id, student_id, status, seat_no) VALUES
  'REGISTERED','A-001');
 
 INSERT INTO booths (job_fair_id, company_id, booth_no, location, checked_in) VALUES
-((SELECT id FROM job_fairs WHERE name='2025春季校园双选会'), (SELECT id FROM companies WHERE credit_code='CRED-010'),'A12','一区',0);
+((SELECT id FROM job_fairs WHERE name='2025春季校园双选会'), (SELECT id FROM companies WHERE credit_code='91310000MA1K12345X'),'A12','一区',0);
 
 INSERT INTO announcements (title, content, target, publish_at, pinned) VALUES
 ('欢迎使用校园招聘平台','这是 SQL 脚本插入的示例公告。','ALL',NOW(6),0);
 
 INSERT INTO interviews (job_id, student_id, scheduled_at, location, interviewer, status, feedback) VALUES
-((SELECT id FROM jobs WHERE title='Java后端实习生' AND company_id=(SELECT id FROM companies WHERE credit_code='CRED-010') ORDER BY id LIMIT 1),
+((SELECT id FROM jobs WHERE title='Java后端实习生' AND company_id=(SELECT id FROM companies WHERE credit_code='91310000MA1K12345X') ORDER BY id LIMIT 1),
  (SELECT id FROM students WHERE student_no='20259999'),
  DATE_ADD(NOW(6), INTERVAL 3 DAY), '会议室1', '王工', 'PENDING', NULL);
 
@@ -387,6 +389,7 @@ SET foreign_key_checks = 1;
 INSERT INTO user_accounts (username, password_hash, role, active, student_id, company_id) VALUES
 ('admin', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'ADMIN', 1, NULL, NULL),
 ('20259999', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'STUDENT', 1, (SELECT id FROM students WHERE student_no='20259999'), NULL),
-('CRED-010', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'COMPANY', 1, NULL, (SELECT id FROM companies WHERE credit_code='CRED-010'));
+('91310000MA1K12345X', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'COMPANY', 1, NULL, (SELECT id FROM companies WHERE credit_code='91310000MA1K12345X')),
+('91310000MA1K67890Y', '$2a$10$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVKIUi', 'COMPANY', 1, NULL, (SELECT id FROM companies WHERE credit_code='91310000MA1K67890Y'));
 
 SET foreign_key_checks = 1;

@@ -64,7 +64,7 @@ const statusText = (status) => {
     PENDING: '待处理', 
     SUBMITTED: '已投递',
     VIEWED: '已查看', 
-    INTERVIEW: '面试中', 
+    INTERVIEW: '待面试', 
     ACCEPTED: '已录用', 
     HIRED: '已录用',
     REJECTED: '已拒绝', 

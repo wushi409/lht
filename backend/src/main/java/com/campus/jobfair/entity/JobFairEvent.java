@@ -41,4 +41,7 @@ public class JobFairEvent extends BaseEntity {
 
     @Column(length = 300)
     private String description;
+
+    @Column(length = 8)
+    private String checkinCode;
 }

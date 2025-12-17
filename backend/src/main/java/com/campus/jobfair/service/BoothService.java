@@ -82,4 +82,34 @@ public class BoothService {
         booth.setCheckinTime(null);
         return boothRepository.save(booth);
     }
+
+    @Transactional
+    public Booth update(Long boothId, BoothRequest request) {
+        Booth booth = boothRepository.findById(boothId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "展位不存在"));
+        
+        if (request.getCompanyId() != null) {
+            Company company = companyRepository.findById(request.getCompanyId())
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "企业不存在"));
+            booth.setCompany(company);
+        } else {
+            booth.setCompany(null);
+        }
+        
+        if (request.getBoothNo() != null) {
+            booth.setBoothNo(request.getBoothNo());
+        }
+        if (request.getLocation() != null) {
+            booth.setLocation(request.getLocation());
+        }
+        
+        return boothRepository.save(booth);
+    }
+
+    @Transactional
+    public void delete(Long boothId) {
+        Booth booth = boothRepository.findById(boothId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "展位不存在"));
+        boothRepository.delete(booth);
+    }
 }

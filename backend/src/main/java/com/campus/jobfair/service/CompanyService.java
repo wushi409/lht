@@ -41,6 +41,10 @@ public class CompanyService {
         return companyRepository.findByStatus(CompanyStatus.PENDING);
     }
 
+    public List<Company> listAll() {
+        return companyRepository.findAll();
+    }
+
     public Company getByUsername(String username) {
         return companyRepository.findByCreditCode(username)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "企业不存在"));

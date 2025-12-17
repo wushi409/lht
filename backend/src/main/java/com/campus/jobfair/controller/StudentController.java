@@ -184,8 +184,13 @@ public class StudentController {
 
     @PostMapping("/me/registrations/{id}/checkin")
     public ResponseEntity<ApiResponse<EventRegistration>> selfCheckin(@AuthenticationPrincipal CustomUserDetails user,
-                                                                      @PathVariable Long id) {
-        return ResponseEntity.ok(ApiResponse.ok(eventService.selfCheckIn(user.getUsername(), id)));
+                                                                      @PathVariable Long id,
+                                                                      @RequestBody java.util.Map<String, String> body) {
+        String checkinCode = body.get("checkinCode");
+        if (checkinCode == null || checkinCode.isEmpty()) {
+            return ResponseEntity.badRequest().body(ApiResponse.fail("签到码不能为空"));
+        }
+        return ResponseEntity.ok(ApiResponse.ok(eventService.selfCheckIn(user.getUsername(), id, checkinCode)));
     }
 
     @PostMapping("/me/checkin/{eventId}")

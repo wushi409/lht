@@ -1,5 +1,6 @@
 package com.campus.jobfair.controller;
 
+import com.campus.jobfair.dto.AdminCheckinRequest;
 import com.campus.jobfair.dto.ApiResponse;
 import com.campus.jobfair.dto.JobFairEventRequest;
 import com.campus.jobfair.dto.JobFairRequest;
@@ -7,6 +8,7 @@ import com.campus.jobfair.entity.EventRegistration;
 import com.campus.jobfair.entity.JobFair;
 import com.campus.jobfair.entity.JobFairEvent;
 import com.campus.jobfair.service.EventService;
+import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -64,6 +66,10 @@ public class EventController {
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/event-registrations")
     public ResponseEntity<ApiResponse<List<EventRegistration>>> listRegistrations(@org.springframework.web.bind.annotation.RequestParam(required = false) Long eventId) {
+        if (eventId == null) {
+            // 获取所有活动的报名记录
+            return ResponseEntity.ok(ApiResponse.ok(eventService.listAllRegistrations()));
+        }
         return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));
     }
 
@@ -71,5 +77,11 @@ public class EventController {
     @GetMapping("/admin/events/{eventId}/registrations")
     public ResponseEntity<ApiResponse<List<EventRegistration>>> getEventRegistrations(@PathVariable Long eventId) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/admin/checkin")
+    public ResponseEntity<ApiResponse<java.util.Map<String, Object>>> manualCheckin(@Valid @RequestBody AdminCheckinRequest request) {
+        return ResponseEntity.ok(ApiResponse.ok(eventService.adminCheckIn(request.getEventId(), request.getRegistrationId())));
     }
 }

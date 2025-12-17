@@ -5,6 +5,10 @@ export const adminApi = {
     return request.get('/admin/companies/pending')
   },
 
+  getAllCompanies() {
+    return request.get('/admin/companies')
+  },
+
   reviewCompany(id, approved, reason) {
     return request.post(`/admin/companies/${id}/approve`, null, {
       params: { approved, reason }
