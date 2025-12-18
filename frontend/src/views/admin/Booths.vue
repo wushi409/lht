@@ -10,7 +10,7 @@
 
       <el-form :inline="true" style="margin-bottom: 16px">
         <el-form-item label="双选会">
-          <el-select v-model="selectedFairId" placeholder="选择双选会" @change="fetchBooths">
+          <el-select v-model="selectedFairId" placeholder="选择双选会" @change="fetchBooths" style="width: 280px">
             <el-option label="全部" :value="null" />
             <el-option v-for="fair in fairs" :key="fair.id" :label="fair.name" :value="fair.id" />
           </el-select>

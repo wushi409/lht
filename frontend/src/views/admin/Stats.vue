@@ -94,7 +94,8 @@ const intentChart = ref(null)
 
 const STATUS_LABEL_MAP = {
   SUBMITTED: '已投递',
-  INTERVIEW: '面试中',
+  VIEWED: '查看',
+  INTERVIEW: '已面试',
   HIRED: '已录用',
   REJECTED: '已拒绝',
   WITHDRAWN: '已撤回'

@@ -5,7 +5,8 @@ export const JobStatus = {
 
 export const ApplicationStatus = {
   SUBMITTED: { value: 'SUBMITTED', label: '已投递', type: 'info' },
-  INTERVIEW: { value: 'INTERVIEW', label: '面试中', type: 'primary' },
+  VIEWED: { value: 'VIEWED', label: '查看', type: '' },
+  INTERVIEW: { value: 'INTERVIEW', label: '已面试', type: 'primary' },
   HIRED: { value: 'HIRED', label: '已录用', type: 'success' },
   REJECTED: { value: 'REJECTED', label: '不合适', type: 'danger' },
   WITHDRAWN: { value: 'WITHDRAWN', label: '已撤回', type: 'info' }

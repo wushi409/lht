@@ -245,8 +245,46 @@ const companyDialogVisible = ref(false)
 const currentJob = ref(null)
 const currentCompany = ref(null)
 
-const handleTabClick = () => {
-  // Mock tab switch behavior
+const handleTabClick = async () => {
+  console.log('Tab clicked:', activeJobTab.value)
+  loadingJobs.value = true
+  try {
+    let jobs = await request.get('/jobs') || []
+    console.log('Total jobs:', jobs.length)
+    
+    if (activeJobTab.value === 'hot') {
+      // 名企推荐：优先显示知名企业（规模大的）
+      jobs.sort((a, b) => {
+        const scaleOrder = { '1000人以上': 4, '500-1000人': 3, '200-500人': 2, '50-200人': 1 }
+        const aScale = scaleOrder[a.company?.scale] || 0
+        const bScale = scaleOrder[b.company?.scale] || 0
+        return bScale - aScale
+      })
+      hotJobs.value = jobs.slice(0, 8)
+      console.log('Hot jobs:', hotJobs.value.length)
+    } else if (activeJobTab.value === 'new') {
+      // 最新发布：按创建时间倒序
+      jobs.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+        return dateB - dateA
+      })
+      hotJobs.value = jobs.slice(0, 8)
+      console.log('New jobs:', hotJobs.value.length)
+    } else if (activeJobTab.value === 'intern') {
+      // 实习生：筛选实习类型的职位
+      const internJobs = jobs.filter(job => 
+        job.jobType && job.jobType.includes('实习')
+      )
+      console.log('Intern jobs found:', internJobs.length)
+      hotJobs.value = internJobs.slice(0, 8)
+    }
+  } catch (e) {
+    console.error('Error fetching jobs:', e)
+    hotJobs.value = []
+  } finally {
+    loadingJobs.value = false
+  }
 }
 
 const showJobDetail = (job) => {

@@ -4,7 +4,26 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="" />
+    <list default="true" id="05aa0df3-1567-4adb-8723-b1be856d1208" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db/schema-mysql.sql" beforeDir="false" afterPath="$PROJECT_DIR$/db/schema-mysql.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/controller/EventController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/repository/EventRegistrationRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/repository/EventRegistrationRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/EventService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ExportService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/campus/jobfair/service/ExportService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/EventController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/controller/EventController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/repository/EventRegistrationRepository.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/repository/EventRegistrationRepository.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/EventService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/EventService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/ExportService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/campus/jobfair/service/ExportService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/stores/dict.js" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/stores/dict.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/admin/Booths.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/admin/Booths.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/admin/Checkin.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/admin/Checkin.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/admin/ScanCheckin.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/admin/ScanCheckin.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/admin/Stats.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/admin/Stats.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/company/Applications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/company/Applications.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../frontend/src/views/student/Applications.vue" beforeDir="false" afterPath="$PROJECT_DIR$/../frontend/src/views/student/Applications.vue" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -21,27 +40,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RequestMappingsPanelOrder0&quot;: &quot;0&quot;,
-    &quot;RequestMappingsPanelOrder1&quot;: &quot;1&quot;,
-    &quot;RequestMappingsPanelWidth0&quot;: &quot;75&quot;,
-    &quot;RequestMappingsPanelWidth1&quot;: &quot;75&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Spring Boot.JobFairApplication.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/毕设/lht/backend&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Notification.DisplayName-DoNotAsk-DatabaseConfigFileWatcher.found": "发现新的/更新的数据库配置",
+    "Notification.DoNotAsk-DatabaseConfigFileWatcher.found": "true",
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Spring Boot.JobFairApplication.executor": "Run",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/毕设/lht/backend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager">
     <configuration name="JobFairApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
       <option name="ALTERNATIVE_JRE_PATH" value="17" />
@@ -72,6 +93,7 @@
       <workItem from="1765888267908" duration="5901000" />
       <workItem from="1765937793228" duration="12971000" />
       <workItem from="1765970995675" duration="7240000" />
+      <workItem from="1765980751286" duration="3126000" />
     </task>
     <servers />
   </component>

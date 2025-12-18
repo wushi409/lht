@@ -74,6 +74,17 @@ public class EventController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/event-registrations/page")
+    public ResponseEntity<ApiResponse<com.campus.jobfair.dto.PageResponse<EventRegistration>>> listRegistrationsWithPage(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) Long eventId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false) String keyword,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "5") int size) {
+        org.springframework.data.domain.Page<EventRegistration> result = eventService.listRegistrationsWithPage(eventId, keyword, page, size);
+        return ResponseEntity.ok(ApiResponse.ok(com.campus.jobfair.dto.PageResponse.of(result)));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/admin/events/{eventId}/registrations")
     public ResponseEntity<ApiResponse<List<EventRegistration>>> getEventRegistrations(@PathVariable Long eventId) {
         return ResponseEntity.ok(ApiResponse.ok(eventService.listRegistrationsByEvent(eventId)));

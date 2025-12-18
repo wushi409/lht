@@ -116,8 +116,9 @@ public class ExportService {
         String statusStr = status.toString();
         switch (statusStr) {
             case "SUBMITTED": return "已投递";
-            case "REVIEWED": return "已查看";
-            case "INTERVIEW": return "面试中";
+            case "REVIEWED": return "查看";
+            case "VIEWED": return "查看";
+            case "INTERVIEW": return "已面试";
             case "OFFERED": return "已录用";
             case "REJECTED": return "已拒绝";
             case "WITHDRAWN": return "已撤回";

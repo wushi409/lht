@@ -161,7 +161,7 @@
             v-if="statsEventId && checkinList.length > 0"
             v-model:current-page="statsCurrentPage"
             v-model:page-size="statsPageSize"
-            :page-sizes="[10, 20, 50, 100]"
+            :page-sizes="[5, 10, 20, 50]"
             :total="checkinList.length"
             layout="total, sizes, prev, pager, next, jumper"
             style="margin-top: 20px; justify-content: center"
@@ -202,7 +202,7 @@ const stats = ref({
 const checkinList = ref([])
 const loadingStats = ref(false)
 const statsCurrentPage = ref(1)
-const statsPageSize = ref(20)
+const statsPageSize = ref(5)
 
 const fetchEvents = async () => {
   try {

@@ -250,6 +250,48 @@ public class EventService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<EventRegistration> listRegistrationsWithPage(Long eventId, String keyword, int page, int size) {
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size, 
+            org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+        
+        org.springframework.data.domain.Page<EventRegistration> registrations;
+        
+        // 根据是否有eventId和keyword选择不同的查询方法
+        if (keyword != null && !keyword.trim().isEmpty()) {
+            String searchKeyword = "%" + keyword.trim() + "%";
+            if (eventId == null) {
+                // 全局搜索
+                registrations = eventRegistrationRepository.searchAll(searchKeyword, pageable);
+            } else {
+                // 指定活动内搜索
+                registrations = eventRegistrationRepository.searchByEvent(eventId, searchKeyword, pageable);
+            }
+        } else {
+            // 无搜索关键词
+            if (eventId == null) {
+                registrations = eventRegistrationRepository.findAll(pageable);
+            } else {
+                JobFairEvent event = jobFairEventRepository.findById(eventId)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在"));
+                registrations = eventRegistrationRepository.findByEvent(event, pageable);
+            }
+        }
+        
+        // 强制加载关联对象
+        for (EventRegistration reg : registrations.getContent()) {
+            if (reg.getStudent() != null) {
+                reg.getStudent().getName();
+                reg.getStudent().getStudentNo();
+                reg.getStudent().getCollege();
+            }
+            if (reg.getEvent() != null) {
+                reg.getEvent().getName();
+            }
+        }
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
     public List<EventRegistration> listRegistrationsByEvent(Long eventId) {
         JobFairEvent event = jobFairEventRepository.findById(eventId)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "活动不存在"));

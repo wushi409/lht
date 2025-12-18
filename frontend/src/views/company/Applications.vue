@@ -247,7 +247,7 @@ const confirmInterview = async () => {
 const formatDate = (date) => date ? new Date(date).toLocaleDateString('zh-CN') : ''
 
 const statusText = (status) => {
-  const map = { PENDING: '待处理', SUBMITTED: '已投递', VIEWED: '已查看', INTERVIEW: '待面试', ACCEPTED: '已录用', HIRED: '已录用', REJECTED: '已拒绝', WITHDRAWN: '已撤回' }
+  const map = { PENDING: '待处理', SUBMITTED: '已投递', VIEWED: '查看', INTERVIEW: '已面试', ACCEPTED: '已录用', HIRED: '已录用', REJECTED: '已拒绝', WITHDRAWN: '已撤回' }
   return map[status] || status
 }
 
